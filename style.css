@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-bg text-ink font-sans antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(17, 22, 37, 0.15);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@layer components {
+  /* Frosted glass card — mirrors the reference's backdrop-filter: blur(8-15px) overlays */
+  .glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/60;
+  }
+
+  .glass-dark {
+    @apply bg-ink/40 backdrop-blur-md border border-white/10;
+  }
+
+  /* Standard soft card used across the reference (white bg, soft shadow, rounded-2xl) */
+  .card-soft {
+    @apply bg-card rounded-xl2 shadow-soft;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-primary-gradient text-white font-semibold rounded-xl2 shadow-glow transition-transform duration-200 active:scale-95 hover:brightness-110;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 bg-white text-ink font-semibold rounded-xl2 shadow-soft border border-black/5 transition-transform duration-200 active:scale-95 hover:bg-primary-50;
+  }
+
+  .section-label {
+    @apply text-xs font-bold tracking-widest text-primary uppercase;
+  }
+}
+
