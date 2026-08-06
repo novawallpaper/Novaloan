@@ -10,7 +10,7 @@
 const WHATSAPP_NUMBER = "919311649629"; // country code + number, digits only
 const DELIVERY_CHARGE = 49;             // flat delivery charge (INR)
 const FREE_DELIVERY_ABOVE = 499;        // free delivery threshold (INR)
-const RAZORPAY_KEY_ID = "rzp_test_TC8rdQlrs9bLOu"; // replace with your live key when ready
+const RAZORPAY_KEY_ID = "rzp_live_TCZM7OsD80tNpH"; // replace with your live key when ready
 
 // ------------------------------------------------------
 // PART 1 — CATEGORY DEFINITIONS
