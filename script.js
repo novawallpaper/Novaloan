@@ -1,828 +1,1053 @@
-// ======================================================
-// depthnova Gardens — Farm House & Garden Decoration
-// Plant Nursery + Online Plant Store
-// Pure vanilla JS, no backend required.
-// ======================================================
+/* =========================================================
+   depthnova — app logic (Free & Cleaned Version with Profile)
+   ========================================================= */
 
-// ------------------------------------------------------
-// PART 0 — BUSINESS CONFIG
-// ------------------------------------------------------
-const WHATSAPP_NUMBER = "919311649629"; // country code + number, digits only
-const DELIVERY_CHARGE = 49;             // flat delivery charge (INR)
-const FREE_DELIVERY_ABOVE = 499;        // free delivery threshold (INR)
-const RAZORPAY_KEY_ID = "rzp_live_TCZM7OsD80tNpH"; // replace with your live key when ready
+const RAZORPAY_KEY_ID = "rzp_live_TCZM7OsD80tNpH"; // Custom wallpaper order ke liye
 
-// ------------------------------------------------------
-// PART 1 — CATEGORY DEFINITIONS
-// ------------------------------------------------------
-const categories = [
-    { key: "indoor",      label: "Indoor Plants",     icon: "fa-house" },
-    { key: "outdoor",     label: "Outdoor Plants",    icon: "fa-tree" },
-    { key: "flower",      label: "Flower Plants",     icon: "fa-spa" },
-    { key: "fruit",       label: "Fruit Plants",      icon: "fa-apple-whole" },
-    { key: "bonsai",      label: "Bonsai",            icon: "fa-seedling" },
-    { key: "decorative",  label: "Decorative Plants", icon: "fa-gem" },
-    { key: "pots",        label: "Pots",              icon: "fa-box" },
-    { key: "fertilizers", label: "Fertilizers",       icon: "fa-flask" },
-    { key: "tools",       label: "Gardening Tools",   icon: "fa-screwdriver-wrench" }
+/* ---------------- Support contact info --------- */
+const SUPPORT_EMAIL = "dethnovacustomersupport@gmail.com";
+const TELEGRAM_URL = "https://t.me/depthnova";
+
+/* ---------------- In-memory state --------------- */
+const state = {
+  activeTab: "explore",
+  activeCategory: "All",
+  activeFilter: "grid",
+  catDetailCategory: null,
+  catDetailFilter: "all",
+  searchQuery: "",
+  favorites: new Set(),
+  currentWallpaper: null,
+  use24Hour: false,
+  orderImage: null, // { dataUrl, file }
+};
+
+/* ---------------- Category collections ---------------- */
+const COLLECTIONS = [
+  { key: "Space", title: "Aero Space", img: "https://novawallpaper.github.io/depthx-app/pexels-koyeldey-31179659.jpg" },
+  { key: "Cyber", title: "Cyber", img: "https://novawallpaper.github.io/depthx-app/pexels-steve-29986988.jpg" },
+  { key: "Nature", title: "Nature", img: "https://novawallpaper.github.io/depthx-app/pexels-steve-30018099.jpg" },
+  { key: "Gaming", title: "Gaming", img: "https://novawallpaper.github.io/depthx-app/pexels-steve-30843199.jpg" },
+  { key: "Anime", title: "Anime Vibes", img: "https://novawallpaper.github.io/depthx-app/pexels-steve-30936352.jpg" },
+  { key: "Superheroes", title: "Superheroes", img: "https://novawallpaper.github.io/depthx-app/pexels-steve-30843199.jpg" },
 ];
 
-function categoryLabel(key) {
-    const c = categories.find(c => c.key === key);
-    return c ? c.label : key;
-}
+/* ---------------- Sample wallpaper data (All Free) ---------------- */
+const WALLPAPERS = [
+  { id: "w1", title: "Wallpaper 1", time: "02:30", category: "Space", img: "https://novawallpaper.github.io/depthx-app/pexels-koyeldey-31179659.jpg" },
+  { id: "w2", title: "Wallpaper 2", time: "09:15", category: "Space", img: "https://novawallpaper.github.io/depthx-app/pexels-steve-29986988.jpg" },
+  { id: "w3", title: "Wallpaper 3", time: "23:47", category: "Cyber", img: "https://novawallpaper.github.io/depthx-app/pexels-steve-30018099.jpg" },
+  { id: "w4", title: "Wallpaper 4", time: "18:05", category: "Cyber", img: "https://novawallpaper.github.io/depthx-app/pexels-steve-30843199.jpg" },
+  { id: "w5", title: "Wallpaper 5", time: "06:20", category: "Nature", img: "https://novawallpaper.github.io/depthx-app/pexels-steve-30936352.jpg" },
+  { id: "w6", title: "Wallpaper 6", time: "17:40", category: "Nature", img: "https://novawallpaper.github.io/depthx-app/pexels-koyeldey-31179659.jpg" },
 
-// ------------------------------------------------------
-// PART 2 — SERVICES DATA
-// ------------------------------------------------------
-const servicesData = [
-    { name: "Farm House Decoration", icon: "fa-house-chimney", desc: "Complete themed decor for farm houses and weekend homes." },
-    { name: "Garden Design",         icon: "fa-drafting-compass", desc: "Custom garden layouts designed around your space and light." },
-    { name: "Landscaping",           icon: "fa-mountain-sun", desc: "Full landscape transformation — lawns, beds, pathways and more." },
-    { name: "Lawn Development",      icon: "fa-leaf", desc: "New lawn laying, turfing and ongoing lawn care." },
-    { name: "Vertical Garden",       icon: "fa-layer-group", desc: "Space-saving living walls for balconies, patios and offices." },
-    { name: "Water Fountain",        icon: "fa-water", desc: "Decorative water fountains designed and installed on-site." },
-    { name: "Artificial Grass",      icon: "fa-grip-lines", desc: "All-weather artificial turf for lawns, terraces and rooftops." },
-    { name: "Irrigation System",     icon: "fa-faucet-drip", desc: "Drip and sprinkler irrigation systems for efficient watering." },
-    { name: "Plant Installation",    icon: "fa-seedling", desc: "On-site plant selection, planting and placement by our team." }
+  { id: "w11", title: "Login Frame 01", time: "03:10", category: "Abstract", img: "https://novawallpaper.github.io/depthx-app/pexels-steve-29986988.jpg" },
+  { id: "w12", title: "Login Frame 02", time: "11:25", category: "Abstract", img: "https://novawallpaper.github.io/depthx-app/pexels-steve-30018099.jpg" },
+  { id: "w13", title: "Login Frame 03", time: "15:40", category: "Abstract", img: "https://novawallpaper.github.io/depthx-app/pexels-steve-30843199.jpg" },
+  { id: "w14", title: "Login Frame 04", time: "19:55", category: "Nature", img: "https://novawallpaper.github.io/depthx-app/pexels-steve-30936352.jpg" },
+  { id: "w15", title: "Login Frame 05", time: "08:15", category: "Nature", img: "https://novawallpaper.github.io/depthx-app/pexels-koyeldey-31179659.jpg" },
+  { id: "w16", title: "Login Frame 06", time: "22:30", category: "Dark", img: "https://novawallpaper.github.io/depthx-app/pexels-steve-29986988.jpg" },
+  { id: "w17", title: "Login Frame 07", time: "05:45", category: "Nature", img: "https://novawallpaper.github.io/depthx-app/pexels-steve-30018099.jpg" },
+  { id: "w18", title: "Login Frame 08", time: "13:20", category: "Minimal", img: "https://novawallpaper.github.io/depthx-app/pexels-steve-30843199.jpg" },
+  { id: "w19", title: "Login Frame 09", time: "20:05", category: "Dark", img: "https://novawallpaper.github.io/depthx-app/pexels-steve-30936352.jpg" },
+  { id: "w20", title: "Login Frame 10", time: "16:50", category: "Nature", img: "https://novawallpaper.github.io/depthx-app/pexels-koyeldey-31179659.jpg" },
+  { id: "w21", title: "Login Frame 11", time: "10:35", category: "Abstract", img: "https://novawallpaper.github.io/depthx-app/pexels-steve-29986988.jpg" },
+  { id: "w22", title: "Login Frame 12", time: "04:00", category: "Nature", img: "https://novawallpaper.github.io/depthx-app/pexels-steve-30018099.jpg" },
+
+  { id: "w23", title: "Wallpaper 23", time: "08:12", category: "Minimal", img: "https://novawallpaper.github.io/depthx-app/pexels-steve-30843199.jpg" },
+  { id: "w24", title: "Wallpaper 24", time: "08:12", category: "Minimal", img: "https://novawallpaper.github.io/depthx-app/pexels-steve-30936352.jpg" },
+  { id: "w25", title: "Wallpaper 25", time: "08:12", category: "Minimal", img: "https://novawallpaper.github.io/depthx-app/pexels-koyeldey-31179659.jpg" },
+  { id: "w26", title: "Wallpaper 26", time: "08:12", category: "Minimal", img: "https://novawallpaper.github.io/depthx-app/pexels-steve-29986988.jpg" }
 ];
 
-// ------------------------------------------------------
-// PART 3 — PRODUCT CATALOG
-// ------------------------------------------------------
-const productData = [
-    { id: 1, name: "Money Plant (Golden Pothos)", category: "indoor", price: 249, mrp: 349, rating: 4.6, reviews: 812, bestseller: true,
-      desc: "An easy-to-grow trailing vine known for its air-purifying qualities. Thrives in low light and needs watering only once a week — perfect for beginners and busy homes." },
-    { id: 2, name: "Snake Plant (Sansevieria)", category: "indoor", price: 349, mrp: 499, rating: 4.7, reviews: 654, bestseller: false,
-      desc: "One of the toughest indoor plants around. Tolerates neglect, low light and irregular watering while releasing oxygen through the night." },
-    { id: 3, name: "Areca Palm", category: "indoor", price: 899, mrp: 1199, rating: 4.5, reviews: 231, bestseller: false,
-      desc: "A lush, feathery palm that instantly softens any corner. Great as a natural room divider or statement piece near windows." },
-    { id: 4, name: "Peace Lily", category: "indoor", price: 449, mrp: 599, rating: 4.6, reviews: 398, bestseller: false,
-      desc: "Elegant white blooms paired with glossy dark green leaves. Actively filters indoor air and thrives in medium to low light." },
+const SAMPLES = WALLPAPERS.slice(0, 4);
 
-    { id: 5, name: "Bougainvillea (Mixed Colour)", category: "outdoor", price: 299, mrp: 399, rating: 4.5, reviews: 276, bestseller: false,
-      desc: "A vigorous flowering climber that covers boundary walls and gates in vibrant colour almost all year round." },
-    { id: 6, name: "Hibiscus Plant", category: "outdoor", price: 249, mrp: 349, rating: 4.4, reviews: 189, bestseller: false,
-      desc: "A classic garden shrub producing large, showy blooms through the warmer months. Loves full sun." },
-    { id: 7, name: "Croton Plant", category: "outdoor", price: 349, mrp: 449, rating: 4.3, reviews: 142, bestseller: false,
-      desc: "Bold, multi-coloured foliage that adds year-round colour to outdoor beds and borders without needing flowers." },
-    { id: 8, name: "Curry Leaf Plant", category: "outdoor", price: 199, mrp: 279, rating: 4.7, reviews: 503, bestseller: false,
-      desc: "A kitchen-garden essential — fresh curry leaves whenever you need them, straight from your own garden." },
-
-    { id: 9, name: "Rose Plant (Mixed Colours)", category: "flower", price: 279, mrp: 399, rating: 4.6, reviews: 421, bestseller: true,
-      desc: "Fragrant, repeat-flowering rose bushes available in mixed colours. A timeless addition to any garden bed." },
-    { id: 10, name: "Marigold Plant", category: "flower", price: 99, mrp: 149, rating: 4.5, reviews: 367, bestseller: false,
-      desc: "Bright, festive blooms that flower quickly and repeatedly — ideal for borders, pots and quick garden colour." },
-    { id: 11, name: "Jasmine (Mogra) Plant", category: "flower", price: 329, mrp: 449, rating: 4.7, reviews: 298, bestseller: false,
-      desc: "Deliciously fragrant night-blooming flowers. A traditional favourite for Indian gardens and courtyards." },
-    { id: 12, name: "Petunia Plant", category: "flower", price: 149, mrp: 219, rating: 4.3, reviews: 118, bestseller: false,
-      desc: "Compact, trailing flowers perfect for hanging baskets, window boxes and colourful balcony displays." },
-
-    { id: 13, name: "Dwarf Mango Plant (Grafted)", category: "fruit", price: 599, mrp: 799, rating: 4.5, reviews: 214, bestseller: true,
-      desc: "A grafted dwarf mango variety suited to home gardens and large pots, fruiting within 2–3 years." },
-    { id: 14, name: "Guava Plant (Grafted)", category: "fruit", price: 449, mrp: 599, rating: 4.4, reviews: 176, bestseller: false,
-      desc: "Sweet, disease-resistant grafted guava that fruits early and performs well in containers or open ground." },
-    { id: 15, name: "Lemon Plant (Grafted)", category: "fruit", price: 349, mrp: 449, rating: 4.6, reviews: 245, bestseller: false,
-      desc: "A reliable, near year-round fruiting lemon variety — great for both kitchen gardens and pots." },
-    { id: 16, name: "Papaya Plant (Dwarf)", category: "fruit", price: 199, mrp: 279, rating: 4.2, reviews: 97, bestseller: false,
-      desc: "Fast-growing dwarf papaya that fruits within the first year, well suited to smaller garden spaces." },
-
-    { id: 17, name: "Ficus Bonsai", category: "bonsai", price: 1499, mrp: 1999, rating: 4.6, reviews: 88, bestseller: false,
-      desc: "A beginner-friendly bonsai with a naturally sturdy trunk and glossy leaves, ideal for indoor display." },
-    { id: 18, name: "Banyan Bonsai", category: "bonsai", price: 2199, mrp: 2799, rating: 4.8, reviews: 54, bestseller: false,
-      desc: "A striking specimen featuring aerial roots and a broad canopy — a real conversation-starter centrepiece." },
-    { id: 19, name: "Jade Bonsai", category: "bonsai", price: 999, mrp: 1299, rating: 4.5, reviews: 132, bestseller: false,
-      desc: "A succulent-style bonsai that stores water in thick leaves, making it very forgiving and low maintenance." },
-
-    { id: 20, name: "Areca Palm Decorative Planter Set", category: "decorative", price: 1299, mrp: 1699, rating: 4.5, reviews: 76, bestseller: false,
-      desc: "A ready-to-place Areca palm in a premium designer planter — instant décor for entryways and lobbies." },
-    { id: 21, name: "Artificial Boxwood Topiary Ball", category: "decorative", price: 799, mrp: 999, rating: 4.3, reviews: 61, bestseller: false,
-      desc: "Zero-maintenance faux greenery that keeps its shape and colour all year, perfect for entrance décor." },
-    { id: 22, name: "Hanging Macrame Planter (with Plant)", category: "decorative", price: 449, mrp: 599, rating: 4.4, reviews: 149, bestseller: false,
-      desc: "Boho-style handwoven macrame planter, pre-planted and ready to hang on your balcony or patio." },
-
-    { id: 23, name: "Ceramic Textured Pot (10 inch)", category: "pots", price: 349, mrp: 449, rating: 4.5, reviews: 203, bestseller: false,
-      desc: "A premium textured ceramic pot with drainage hole, finished to complement both indoor and outdoor plants." },
-    { id: 24, name: "Terracotta Pot Set (3 pcs)", category: "pots", price: 299, mrp: 399, rating: 4.4, reviews: 267, bestseller: false,
-      desc: "Classic breathable terracotta pots in three sizes — great root aeration for healthier plants." },
-    { id: 25, name: "Self-Watering Plastic Pot", category: "pots", price: 249, mrp: 329, rating: 4.2, reviews: 158, bestseller: false,
-      desc: "Built-in water reservoir keeps soil consistently moist, reducing watering frequency for busy plant parents." },
-
-    { id: 26, name: "Organic Vermicompost (5kg)", category: "fertilizers", price: 199, mrp: 249, rating: 4.6, reviews: 342, bestseller: false,
-      desc: "100% organic, odourless compost that improves soil structure and feeds plants naturally." },
-    { id: 27, name: "NPK 19:19:19 Fertilizer (1kg)", category: "fertilizers", price: 249, mrp: 329, rating: 4.4, reviews: 187, bestseller: false,
-      desc: "A balanced water-soluble fertilizer for steady, all-round growth across flowering and foliage plants." },
-    { id: 28, name: "Bio Neem Pest Spray (500ml)", category: "fertilizers", price: 199, mrp: 259, rating: 4.5, reviews: 221, bestseller: false,
-      desc: "A gentle, plant-safe neem-based spray that keeps common pests away without harsh chemicals." },
-
-    { id: 29, name: "Gardening Tool Set (5 pcs)", category: "tools", price: 499, mrp: 699, rating: 4.6, reviews: 289, bestseller: true,
-      desc: "A durable 5-piece hand tool kit — trowel, fork, pruner, cultivator and gloves — everything a home gardener needs." },
-    { id: 30, name: "Watering Can (2L)", category: "tools", price: 299, mrp: 399, rating: 4.3, reviews: 165, bestseller: false,
-      desc: "A lightweight 2-litre watering can with a fine-rose spout for gentle, even watering of seedlings and pots." }
-];
-
-productData.forEach(p => {
-    p.image = `https://picsum.photos/seed/depthnova-plant-${p.id}/600/600`;
-    p.off = Math.round(((p.mrp - p.price) / p.mrp) * 100);
-});
-
-// ------------------------------------------------------
-// PART 4 — REVIEWS + GALLERY DATA
-// ------------------------------------------------------
-const reviewsData = [
-    { name: "Ananya Sharma", rating: 5, avatar: "https://i.pravatar.cc/150?img=47",
-      text: "The team transformed our farm house lawn completely. Every plant they recommended is thriving even after the summer heat." },
-    { name: "Rohan Mehta", rating: 5, avatar: "https://i.pravatar.cc/150?img=12",
-      text: "Ordered a set of indoor plants — arrived healthy, well-packed, and exactly as shown. Will order again." },
-    { name: "Priya Nair", rating: 4, avatar: "https://i.pravatar.cc/150?img=32",
-      text: "Vertical garden installation for our balcony looks stunning. Quick site visit and quote on WhatsApp itself." },
-    { name: "Vikram Singh", rating: 5, avatar: "https://i.pravatar.cc/150?img=51",
-      text: "Subscribed to the Premium plant care plan — our garden has never looked healthier. Highly recommended." },
-    { name: "Kavita Rao", rating: 5, avatar: "https://i.pravatar.cc/150?img=45",
-      text: "Beautiful water fountain installed within the timeline promised. Great craftsmanship and clean finish." },
-    { name: "Arjun Kapoor", rating: 4, avatar: "https://i.pravatar.cc/150?img=14",
-      text: "Landscaping for our farm house driveway and lawn came out better than we imagined. Very professional crew." }
-];
-
-const galleryImages = [
-    { seed: "gallery-farmhouse-1", wide: true },
-    { seed: "gallery-lawn-2", wide: false },
-    { seed: "gallery-fountain-3", wide: false },
-    { seed: "gallery-vertical-4", wide: false },
-    { seed: "gallery-pathway-5", wide: false },
-    { seed: "gallery-garden-6", wide: true }
-];
-
-// ------------------------------------------------------
-// PART 5 — APP STATE
-// ------------------------------------------------------
-let cartItems = [];       // [{ id, qty }]
-let wishlistIds = [];     // [id, id, ...]
-let currentShopCategory = "all";
-let selectedPlan = "basic";
-let modalProductId = null;
-let modalQty = 1;
-let uploadedQuoteImageName = "";
-
-const toastEl = document.getElementById("app-toast");
-const searchInput = document.getElementById("search-input");
-
-// ------------------------------------------------------
-// PART 6 — INIT
-// ------------------------------------------------------
+/* =========================================================
+   Init
+   ========================================================= */
 document.addEventListener("DOMContentLoaded", () => {
-    renderShopCategoryBar();
-    renderShopProducts();
-    renderHomePopular();
-    renderServicesGrid("home-services-grid");
-    renderServicesGrid("more-services-grid");
-    renderReviews("home-review-scroll");
-    renderReviews("more-review-scroll");
-    renderGallery();
-    renderCart();
-    selectPlan("basic");
-
-    if (searchInput) {
-        searchInput.addEventListener("input", function () {
-            renderShopProducts(this.value.trim().toLowerCase());
-        });
-    }
-
-    const productModal = document.getElementById("product-modal");
-    if (productModal) {
-        productModal.addEventListener("click", (e) => {
-            if (e.target === productModal) closeProductModal();
-        });
-    }
+  renderCollections();
+  renderWallpapers();
+  renderSamples();
+  wireSearch();
+  wireModalClose();
+  loadUserProfile(); // Profile check on load
 });
 
-// ------------------------------------------------------
-// PART 7 — NAVIGATION
-// ------------------------------------------------------
-function switchTab(tabName, element) {
-    document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
-    document.querySelectorAll(".screen-content").forEach(screen => screen.classList.remove("active"));
-    if (element) element.classList.add("active");
-    const screen = document.getElementById("screen-" + tabName);
-    if (screen) screen.classList.add("active");
-    const activeScreen = document.querySelector(".screen-content.active");
-    if (activeScreen) activeScreen.scrollTop = 0;
+/* =========================================================
+   Google Login & Profile Management Logic
+   ========================================================= */
+function openGoogleLoginModal() {
+  const nameInput = document.getElementById('input-name');
+  const emailInput = document.getElementById('input-email');
+  
+  if (nameInput) nameInput.value = "Rahul Sharma";
+  if (emailInput) emailInput.value = "rahul.sharma@gmail.com";
+  
+  const modal = document.getElementById('google-login-modal');
+  if (modal) modal.style.display = 'flex';
 }
 
-function scrollMoreTo(elementId) {
-    switchTab("more", document.getElementById("nav-more"));
-    setTimeout(() => {
-        const el = document.getElementById(elementId);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 60);
+function closeGoogleLoginModal() {
+  const modal = document.getElementById('google-login-modal');
+  if (modal) modal.style.display = 'none';
 }
 
-function openHomeCategoryInfo(serviceName) {
-    openQuoteSheet();
-    const select = document.getElementById("q-project-type");
-    if (select) {
-        for (const opt of select.options) {
-            if (opt.value === serviceName) { select.value = serviceName; break; }
-        }
-    }
+function saveUserProfile() {
+  const name = document.getElementById('input-name')?.value.trim();
+  const email = document.getElementById('input-email')?.value.trim();
+  const gender = document.getElementById('input-gender')?.value;
+  const age = document.getElementById('input-age')?.value.trim();
+  const phone = document.getElementById('input-phone')?.value.trim();
+
+  if (!name || !email || !age || !phone) {
+    showToast('Please fill all fields');
+    return;
+  }
+
+  const userData = { name, email, gender, age, phone };
+  localStorage.setItem('mitti_user', JSON.stringify(userData));
+
+  closeGoogleLoginModal();
+  loadUserProfile();
+  showToast('Profile created successfully!');
 }
 
-// ------------------------------------------------------
-// PART 8 — SHOP: CATEGORY BAR + PRODUCT GRID
-// ------------------------------------------------------
-function renderShopCategoryBar() {
-    const bar = document.getElementById("shop-cat-bar");
-    if (!bar) return;
-    let html = `
-      <div class="shop-cat-pill active" data-cat="all" onclick="switchShopCategory('all', this)">
-        <div class="shop-cat-pill-icon"><i class="fa-solid fa-border-all"></i></div>
-        <span>All</span>
-      </div>`;
-    categories.forEach(c => {
-        html += `
-      <div class="shop-cat-pill" data-cat="${c.key}" onclick="switchShopCategory('${c.key}', this)">
-        <div class="shop-cat-pill-icon"><i class="fa-solid ${c.icon}"></i></div>
-        <span>${c.label}</span>
-      </div>`;
-    });
-    bar.innerHTML = html;
+function loadUserProfile() {
+  const savedData = localStorage.getItem('mitti_user');
+  const loggedOutView = document.getElementById('profile-logged-out');
+  const loggedInView = document.getElementById('profile-logged-in');
+
+  if (!loggedOutView || !loggedInView) return;
+
+  if (savedData) {
+    const userData = JSON.parse(savedData);
+    
+    loggedOutView.style.display = 'none';
+    loggedInView.style.display = 'flex';
+
+    const displayName = document.getElementById('profile-display-name');
+    const displayEmail = document.getElementById('profile-display-email');
+    const displayGender = document.getElementById('profile-display-gender');
+    const displayAge = document.getElementById('profile-display-age');
+    const displayPhone = document.getElementById('profile-display-phone');
+    const avatarInitial = document.getElementById('user-avatar-initial');
+
+    if (displayName) displayName.innerText = userData.name;
+    if (displayEmail) displayEmail.innerText = userData.email;
+    if (displayGender) displayGender.innerText = userData.gender;
+    if (displayAge) displayAge.innerText = userData.age;
+    if (displayPhone) displayPhone.innerText = userData.phone;
+    if (avatarInitial) avatarInitial.innerText = userData.name.charAt(0).toUpperCase();
+  } else {
+    loggedOutView.style.display = 'flex';
+    loggedInView.style.display = 'none';
+  }
 }
 
-function switchShopCategory(catKey, element) {
-    currentShopCategory = catKey;
-    document.querySelectorAll(".shop-cat-pill").forEach(p => p.classList.remove("active"));
-    if (element) element.classList.add("active");
-    renderShopProducts(searchInput ? searchInput.value.trim().toLowerCase() : "");
+function logoutUser() {
+  localStorage.removeItem('mitti_user');
+  loadUserProfile();
+  showToast('Logged out successfully');
 }
 
-function renderShopProducts(searchQuery = "") {
-    const grid = document.getElementById("shop-product-grid");
-    if (!grid) return;
-    let list = [...productData];
+/* =========================================================
+   Tabs / navigation
+   ========================================================= */
+function switchTab(tab, el) {
+  state.activeTab = tab;
 
-    if (currentShopCategory !== "all") {
-        list = list.filter(p => p.category === currentShopCategory);
-    }
-    if (searchQuery) {
-        list = list.filter(p =>
-            p.name.toLowerCase().includes(searchQuery) ||
-            categoryLabel(p.category).toLowerCase().includes(searchQuery)
-        );
-    }
+  document.querySelectorAll(".screen-content").forEach((s) => s.classList.remove("active"));
+  document.getElementById(`screen-${tab}`).classList.add("active");
 
-    if (list.length === 0) {
-        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fa-solid fa-magnifying-glass"></i><p>No products found. Try a different search.</p></div>`;
-        return;
-    }
-
-    grid.innerHTML = list.map(p => productCardHtml(p)).join("");
+  document.querySelectorAll(".nav-item").forEach((n) => n.classList.remove("active"));
+  if (el) el.classList.add("active");
 }
 
-function renderHomePopular() {
-    const grid = document.getElementById("home-popular-grid");
-    if (!grid) return;
-    const list = productData.filter(p => p.bestseller).slice(0, 4);
-    grid.innerHTML = list.map(p => productCardHtml(p)).join("");
-}
-
-function productCardHtml(p) {
-    const wished = wishlistIds.includes(p.id);
+/* ----- Collections (Categories tab) ----- */
+function renderCollections() {
+  const el = document.getElementById("collection-carousel");
+  el.innerHTML = COLLECTIONS.map((c) => {
+    const count = WALLPAPERS.filter((w) => w.category === c.key).length;
     return `
-    <div class="product-card">
-      <div class="product-img-wrap" style="background-image:url('${p.image}')" onclick="openProductModal(${p.id})">
-        <div class="card-top">
-          ${p.bestseller ? `<span class="bestseller-badge"><i class="fa-solid fa-star"></i> BESTSELLER</span>` : `<span></span>`}
-          <div class="product-wish-btn ${wished ? "wished" : ""}" onclick="toggleWishlist(event, ${p.id})">
-            <i class="fa-solid fa-heart"></i>
-          </div>
+      <div class="carousel-card" style="background-image:url('${c.img}')" onclick="openCategory('${c.key}')">
+        <div class="carousel-info">
+          <h2>${c.title}</h2>
+          <p>${count} wallpaper${count === 1 ? "" : "s"}</p>
+          <button class="explore-pill-btn" onclick="event.stopPropagation(); openCategory('${c.key}')">Explore</button>
         </div>
       </div>
-      <div class="product-info">
-        <h4 onclick="openProductModal(${p.id})">${p.name}</h4>
-        <div class="product-rating"><i class="fa-solid fa-star"></i> ${p.rating.toFixed(1)} <span>(${p.reviews})</span></div>
-        <div class="product-price-row">
-          <span class="product-price">₹${p.price}</span>
-          <span class="product-mrp">₹${p.mrp}</span>
-          <span class="product-off">${p.off}% OFF</span>
-        </div>
-        <div class="product-btn-row">
-          <button class="product-btn-cart" onclick="event.stopPropagation(); addToCart(${p.id}, 1);"><i class="fa-solid fa-cart-plus"></i> Add</button>
-          <button class="product-btn-buy" onclick="event.stopPropagation(); buyNow(${p.id});">Buy Now</button>
+    `;
+  }).join("");
+}
+
+/* ----- Category detail screen ----- */
+function openCategory(category) {
+  state.catDetailCategory = category;
+  state.catDetailFilter = "all";
+  document.getElementById("cat-detail-title").textContent =
+    COLLECTIONS.find((c) => c.key === category)?.title || category;
+
+  document.querySelectorAll(".cat-tab").forEach((t) => t.classList.remove("active"));
+  document.querySelector('.cat-tab[data-cat-filter="all"]').classList.add("active");
+
+  switchTab("category-detail", null);
+  renderCategoryDetailGrid();
+}
+
+function switchCatTab(el) {
+  document.querySelectorAll(".cat-tab").forEach((t) => t.classList.remove("active"));
+  el.classList.add("active");
+  state.catDetailFilter = el.dataset.catFilter;
+  renderCategoryDetailGrid();
+}
+
+function renderCategoryDetailGrid() {
+  let list = WALLPAPERS.filter((w) => w.category === state.catDetailCategory);
+  const container = document.getElementById("cat-detail-grid");
+  if (list.length === 0) {
+    container.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:30px 0;">No wallpapers found.</p>`;
+    return;
+  }
+  container.innerHTML = list.map(cardHtml).join("");
+}
+
+function switchSubCat(el) {
+  document.querySelectorAll(".sub-cat-item").forEach((s) => s.classList.remove("active"));
+  el.classList.add("active");
+  state.activeFilter = el.dataset.filter;
+  renderWallpapers();
+}
+
+function filterByFavoritesQuick() {
+  state.activeFilter = "star";
+  document.querySelectorAll(".sub-cat-item").forEach((s) => s.classList.remove("active"));
+  document.querySelector('.sub-cat-item[data-filter="star"]').classList.add("active");
+  renderWallpapers();
+}
+
+/* =========================================================
+   Search
+   ========================================================= */
+function wireSearch() {
+  const input = document.getElementById("search-input");
+  if (!input) return;
+  input.addEventListener("input", (e) => {
+    state.searchQuery = e.target.value.trim().toLowerCase();
+    renderWallpapers();
+  });
+}
+
+/* =========================================================
+   Rendering (Explore tab)
+   ========================================================= */
+function getFilteredWallpapers() {
+  let list = WALLPAPERS.slice();
+
+  if (state.activeCategory !== "All") {
+    list = list.filter((w) => w.category === state.activeCategory);
+  }
+
+  if (state.searchQuery) {
+    list = list.filter((w) => w.title.toLowerCase().includes(state.searchQuery));
+  }
+
+  switch (state.activeFilter) {
+    case "star":
+      list = list.filter((w) => state.favorites.has(w.id));
+      break;
+    case "shuffle":
+      list = list.sort(() => Math.random() - 0.5);
+      break;
+    default:
+      break;
+  }
+
+  return list;
+}
+
+function renderWallpapers() {
+  const container = document.getElementById("wallpaper-grid-container");
+  if (!container) return;
+  const list = getFilteredWallpapers();
+
+  if (list.length === 0) {
+    container.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:30px 0;">No wallpapers found.</p>`;
+    return;
+  }
+
+  container.innerHTML = list.map(cardHtml).join("");
+}
+
+function renderSamples() {
+  const container = document.getElementById("samples-grid");
+  if (!container) return;
+  container.innerHTML = SAMPLES.map(cardHtml).join("");
+}
+
+function cardHtml(w) {
+  const favClass = state.favorites.has(w.id) ? "favorited" : "";
+  return `
+    <div class="wallpaper-card" style="background-image:url('${w.img}')" onclick="openWallpaper('${w.id}')">
+      <div class="card-top">
+        <div class="star-badge ${favClass}" onclick="toggleFavorite(event, '${w.id}')">
+          <i class="fa-solid fa-heart"></i>
         </div>
       </div>
-    </div>`;
+      <div class="card-bottom">
+        <div class="card-time">${w.category}</div>
+        <div class="card-title">${w.title}</div>
+      </div>
+    </div>
+  `;
 }
 
-// ------------------------------------------------------
-// PART 9 — PRODUCT DETAIL MODAL
-// ------------------------------------------------------
-function openProductModal(id) {
-    const p = productData.find(x => x.id === id);
-    if (!p) return;
-    modalProductId = id;
-    modalQty = 1;
-
-    const modal = document.getElementById("product-modal");
-    const modalBg = document.getElementById("modal-preview-bg");
-    modalBg.style.backgroundImage = `url('${p.image}')`;
-    modalBg.style.backgroundSize = "cover";
-    modalBg.style.backgroundPosition = "center";
-
-    document.getElementById("modal-product-title").innerText = p.name;
-    document.getElementById("modal-product-cat").innerText = categoryLabel(p.category);
-    document.getElementById("modal-product-rating").innerHTML = `<i class="fa-solid fa-star"></i> ${p.rating.toFixed(1)} <span>(${p.reviews} ratings)</span>`;
-    document.getElementById("modal-product-price").innerText = `₹${p.price}`;
-    document.getElementById("modal-product-mrp").innerText = `₹${p.mrp}`;
-    document.getElementById("modal-product-off").innerText = `${p.off}% OFF`;
-    document.getElementById("modal-product-desc").innerText = p.desc;
-    document.getElementById("modal-product-qty").innerText = modalQty;
-
-    const favBtn = document.getElementById("modal-fav-btn");
-    favBtn.classList.toggle("favorited", wishlistIds.includes(id));
-
-    modal.classList.add("active");
-}
-
-function closeProductModal() {
-    document.getElementById("product-modal").classList.remove("active");
-}
-
-function changeModalQty(delta) {
-    modalQty = Math.max(1, modalQty + delta);
-    document.getElementById("modal-product-qty").innerText = modalQty;
-}
-
-function addModalToCart() {
-    if (!modalProductId) return;
-    addToCart(modalProductId, modalQty);
-    closeProductModal();
-}
-
-function buyModalNow() {
-    if (!modalProductId) return;
-    addToCart(modalProductId, modalQty);
-    closeProductModal();
-    openCheckoutSheet();
+function toggleFavorite(event, id) {
+  event.stopPropagation();
+  if (state.favorites.has(id)) {
+    state.favorites.delete(id);
+  } else {
+    state.favorites.add(id);
+  }
+  renderWallpapers();
+  renderSamples();
+  renderCategoryDetailGrid();
 }
 
 function toggleFavoriteModal() {
-    if (!modalProductId) return;
-    toggleWishlistById(modalProductId);
-    const favBtn = document.getElementById("modal-fav-btn");
-    favBtn.classList.toggle("favorited", wishlistIds.includes(modalProductId));
+  if (!state.currentWallpaper) return;
+  const id = state.currentWallpaper.id;
+  if (state.favorites.has(id)) state.favorites.delete(id);
+  else state.favorites.add(id);
+  document.getElementById("modal-fav-btn")?.classList.toggle("favorited", state.favorites.has(id));
+  renderWallpapers();
+  renderSamples();
+  renderCategoryDetailGrid();
 }
 
-// ------------------------------------------------------
-// PART 10 — WISHLIST
-// ------------------------------------------------------
-function toggleWishlist(event, id) {
-    event.stopPropagation();
-    toggleWishlistById(id);
-    renderShopProducts(searchInput ? searchInput.value.trim().toLowerCase() : "");
-    renderHomePopular();
+/* =========================================================
+   Wallpaper preview modal & editor trigger
+   ========================================================= */
+function openWallpaper(id) {
+  const wp = WALLPAPERS.find((w) => w.id === id) || SAMPLES.find((w) => w.id === id);
+  if (!wp) return;
+
+  state.currentWallpaper = wp;
+  openEditorScreen(wp);
 }
 
-function toggleWishlistById(id) {
-    const idx = wishlistIds.indexOf(id);
-    if (idx > -1) {
-        wishlistIds.splice(idx, 1);
-        showToast("Removed from Wishlist");
-    } else {
-        wishlistIds.push(id);
-        showToast("Added to Wishlist ❤️");
+function closeWallpaperModal() {
+  document.getElementById("wallpaper-modal")?.classList.remove("active");
+}
+
+function wireModalClose() {
+  const modal = document.getElementById("wallpaper-modal");
+  if (!modal) return;
+  modal.addEventListener("click", (e) => {
+    const rect = modal.getBoundingClientRect();
+    const clickedCloseZone = e.clientX < rect.left + 56 && e.clientY < rect.top + 56;
+    if (clickedCloseZone) closeWallpaperModal();
+  });
+
+  document.getElementById("modal-download-action")?.addEventListener("click", () => {
+    requestDownload(state.currentWallpaper);
+  });
+
+  document.getElementById("modal-set-action")?.addEventListener("click", () => {
+    requestSetWallpaper(state.currentWallpaper);
+  });
+}
+
+/* =========================================================
+   Set Wallpaper & Download
+   ========================================================= */
+function requestSetWallpaper(wp) {
+  if (!wp) return;
+
+  if (window.NativeBridge && typeof window.NativeBridge.setWallpaper === "function") {
+    try {
+      window.NativeBridge.setWallpaper(wp.img);
+      showToast(`"${wp.title}" set as wallpaper`);
+      closeWallpaperModal();
+      return;
+    } catch (err) {
+      console.error("Native setWallpaper failed: " + err.message);
     }
+  }
+
+  showToast("Browsers can't set wallpaper directly — downloading image…");
+  performDownload(wp);
+  setTimeout(() => {
+    showToast("Open it from your gallery, then tap 'Set as wallpaper'");
+  }, 2400);
+  closeWallpaperModal();
 }
 
-function openWishlistSheet() {
-    const grid = document.getElementById("wishlist-grid");
-    const empty = document.getElementById("wishlist-empty-state");
-    const list = productData.filter(p => wishlistIds.includes(p.id));
-
-    if (list.length === 0) {
-        grid.innerHTML = "";
-        grid.style.display = "none";
-        empty.style.display = "block";
-    } else {
-        grid.style.display = "grid";
-        empty.style.display = "none";
-        grid.innerHTML = list.map(p => productCardHtml(p)).join("");
-    }
-    document.getElementById("wishlist-sheet-overlay").classList.add("active");
+function requestDownload(wp) {
+  if (!wp) return;
+  performDownload(wp);
 }
 
-// ------------------------------------------------------
-// PART 11 — CART
-// ------------------------------------------------------
-function addToCart(id, qty = 1) {
-    const existing = cartItems.find(c => c.id === id);
-    if (existing) {
-        existing.qty += qty;
-    } else {
-        cartItems.push({ id, qty });
-    }
-    renderCart();
-    showToast("Added to Cart 🛒");
-}
+function performDownload(wp) {
+  if (!wp) return;
+  const filename = `${wp.title.replace(/\s+/g, "_")}.jpg`;
 
-function buyNow(id) {
-    addToCart(id, 1);
-    openCheckoutSheet();
-}
+  showToast("Downloading…");
 
-function updateCartQty(id, delta) {
-    const item = cartItems.find(c => c.id === id);
-    if (!item) return;
-    item.qty += delta;
-    if (item.qty <= 0) {
-        cartItems = cartItems.filter(c => c.id !== id);
-    }
-    renderCart();
-}
-
-function removeFromCart(id) {
-    cartItems = cartItems.filter(c => c.id !== id);
-    renderCart();
-    showToast("Item removed from cart");
-}
-
-function getCartTotals() {
-    let subtotal = 0;
-    cartItems.forEach(c => {
-        const p = productData.find(x => x.id === c.id);
-        if (p) subtotal += p.price * c.qty;
+  fetch(wp.img, { mode: "cors" })
+    .then((res) => {
+      if (!res.ok) throw new Error("bad response");
+      return res.blob();
+    })
+    .then((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      showToast("Download complete");
+    })
+    .catch(() => {
+      const a = document.createElement("a");
+      a.href = wp.img;
+      a.download = filename;
+      a.target = "_blank";
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast("Opened image — save it from your browser");
     });
-    const delivery = subtotal === 0 || subtotal >= FREE_DELIVERY_ABOVE ? 0 : DELIVERY_CHARGE;
-    const grandTotal = subtotal + delivery;
-    return { subtotal, delivery, grandTotal };
 }
 
-function renderCart() {
-    const list = document.getElementById("cart-items-list");
-    const emptyState = document.getElementById("cart-empty-state");
-    const summaryCard = document.getElementById("cart-summary-card");
-
-    updateCartBadge();
-
-    if (!list) return;
-
-    if (cartItems.length === 0) {
-        list.innerHTML = "";
-        emptyState.style.display = "block";
-        summaryCard.style.display = "none";
-        return;
-    }
-
-    emptyState.style.display = "none";
-    summaryCard.style.display = "block";
-
-    list.innerHTML = cartItems.map(c => {
-        const p = productData.find(x => x.id === c.id);
-        if (!p) return "";
-        return `
-        <div class="cart-item-row">
-          <div class="cart-item-img" style="background-image:url('${p.image}')"></div>
-          <div class="cart-item-info">
-            <h4>${p.name}</h4>
-            <div class="cart-item-price">₹${p.price * c.qty}</div>
-            <div class="cart-item-controls">
-              <div class="qty-stepper">
-                <button onclick="updateCartQty(${p.id}, -1)">−</button>
-                <span>${c.qty}</span>
-                <button onclick="updateCartQty(${p.id}, 1)">+</button>
-              </div>
-              <div class="cart-remove-btn" onclick="removeFromCart(${p.id})"><i class="fa-solid fa-trash"></i></div>
-            </div>
-          </div>
-        </div>`;
-    }).join("");
-
-    const { subtotal, delivery, grandTotal } = getCartTotals();
-    document.getElementById("cart-subtotal").innerText = `₹${subtotal}`;
-    document.getElementById("cart-delivery").innerText = delivery === 0 ? "FREE" : `₹${delivery}`;
-    document.getElementById("cart-grand-total").innerText = `₹${grandTotal}`;
+/* =========================================================
+   Toast
+   ========================================================= */
+let toastTimer = null;
+function showToast(message) {
+  const toast = document.getElementById("app-toast");
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
 }
 
-function updateCartBadge() {
-    const totalQty = cartItems.reduce((sum, c) => sum + c.qty, 0);
-    const badge = document.getElementById("cart-badge-home");
-    if (badge) badge.innerText = totalQty;
+/* =========================================================
+   Order Wallpaper screen (Custom Orders)
+   ========================================================= */
+function openOrderScreen() {
+  switchTab("order", null);
 }
 
-// ------------------------------------------------------
-// PART 12 — SHEETS (open/close helpers)
-// ------------------------------------------------------
-function closeSheet(id) {
-    document.getElementById(id).classList.remove("active");
+function triggerImageUpload() {
+  document.getElementById("order-file-input")?.click();
 }
 
-function openCheckoutSheet() {
-    if (cartItems.length === 0) {
-        showToast("Your cart is empty");
-        return;
-    }
-    document.getElementById("checkout-sheet-overlay").classList.add("active");
+function handleOrderImageSelect(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  if (file.size > 10 * 1024 * 1024) {
+    showToast("Image is larger than 10MB");
+    event.target.value = "";
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    state.orderImage = { dataUrl: e.target.result, file };
+    const box = document.getElementById("order-upload-box");
+    if (!box) return;
+    box.classList.add("has-image");
+    box.innerHTML = `
+      <img src="${e.target.result}" alt="Selected wallpaper image" />
+      <div class="order-upload-remove" onclick="event.stopPropagation(); clearOrderImage()">Remove image</div>
+    `;
+    document.getElementById("order-pay-btn")?.classList.add("ready");
+  };
+  reader.readAsDataURL(file);
 }
 
-function openQuoteSheet() {
-    document.getElementById("quote-sheet-overlay").classList.add("active");
+function clearOrderImage() {
+  state.orderImage = null;
+  const fileInput = document.getElementById("order-file-input");
+  if (fileInput) fileInput.value = "";
+  const box = document.getElementById("order-upload-box");
+  if (!box) return;
+  box.classList.remove("has-image");
+  box.innerHTML = `
+    <div class="order-upload-icon"><i class="fa-solid fa-image"></i></div>
+    <h4>Tap to select image</h4>
+    <p>JPG, PNG, WebP • Max 10MB</p>
+  `;
+  document.getElementById("order-pay-btn")?.classList.remove("ready");
 }
 
-// ------------------------------------------------------
-// PART 13 — CHECKOUT → WHATSAPP
-// ------------------------------------------------------
-function placeOrder() {
-    const name = document.getElementById("co-name").value.trim();
-    const mobile = document.getElementById("co-mobile").value.trim();
-    const email = document.getElementById("co-email").value.trim();
-    const address = document.getElementById("co-address").value.trim();
-    const state = document.getElementById("co-state").value.trim();
-    const city = document.getElementById("co-city").value.trim();
-    const pincode = document.getElementById("co-pincode").value.trim();
-    const landmark = document.getElementById("co-landmark").value.trim();
+function submitOrderPayment() {
+  if (!state.orderImage) {
+    showToast("Please select an image first");
+    return;
+  }
 
-    if (!name || !mobile || !address || !state || !city || !pincode) {
-        showToast("Please fill all required fields (*)");
-        return;
-    }
-    if (!/^\d{10}$/.test(mobile)) {
-        showToast("Please enter a valid 10-digit mobile number");
-        return;
-    }
-
-    const { subtotal, delivery, grandTotal } = getCartTotals();
-
-    let productLines = cartItems.map(c => {
-        const p = productData.find(x => x.id === c.id);
-        return p ? `• ${p.name} x${c.qty} = ₹${p.price * c.qty}` : "";
-    }).join("\n");
-
-    const message =
-`🌿 *New Order — depthnova Gardens*
-
-*Customer Details*
-Name: ${name}
-Mobile: ${mobile}
-Email: ${email || "-"}
-
-*Delivery Address*
-${address}
-${landmark ? "Landmark: " + landmark : ""}
-${city}, ${state} - ${pincode}
-
-*Order Items*
-${productLines}
-
-Subtotal: ₹${subtotal}
-Delivery: ${delivery === 0 ? "FREE" : "₹" + delivery}
-*Grand Total: ₹${grandTotal}*
-
-Please confirm my order. Thank you!`;
-
-    openWhatsAppMessage(message);
-
-    cartItems = [];
-    renderCart();
-    closeSheet("checkout-sheet-overlay");
-    showToast("Order sent on WhatsApp! We'll confirm shortly.");
-}
-
-// Optional: pay online instead of / in addition to WhatsApp confirmation
-function payOnlineRazorpay() {
-    if (typeof Razorpay === "undefined") {
-        showToast("Payment SDK not loaded. Check your connection.");
-        return;
-    }
-    const { grandTotal } = getCartTotals();
-    if (grandTotal <= 0) {
-        showToast("Your cart is empty");
-        return;
-    }
-    const options = {
-        key: RAZORPAY_KEY_ID,
-        amount: grandTotal * 100,
-        currency: "INR",
-        name: "depthnova Gardens",
-        description: "Plant Store Order Payment",
-        prefill: {
-            name: document.getElementById("co-name").value.trim(),
-            contact: document.getElementById("co-mobile").value.trim(),
-            email: document.getElementById("co-email").value.trim()
-        },
-        theme: { color: "#1a8f4c" },
-        handler: function () {
-            showToast("Payment Successful! Confirming your order...");
-            placeOrder();
-        },
-        modal: {
-            ondismiss: function () { showToast("Payment Cancelled"); }
-        }
-    };
-    const rzp = new Razorpay(options);
-    rzp.on("payment.failed", function () { showToast("Payment Failed. Please try again."); });
-    rzp.open();
-}
-
-// ------------------------------------------------------
-// PART 14 — INSTANT QUOTE → WHATSAPP
-// ------------------------------------------------------
-function handleQuoteImageUpload(event) {
-    const file = event.target.files[0];
-    const box = document.getElementById("q-upload-box");
-    if (!file) return;
-    uploadedQuoteImageName = file.name;
-    const reader = new FileReader();
-    reader.onload = function (e) {
-        box.classList.add("has-image");
-        box.innerHTML = `<img src="${e.target.result}" alt="Uploaded site photo" />`;
-    };
-    reader.readAsDataURL(file);
-}
-
-function submitQuote() {
-    const name = document.getElementById("q-name").value.trim();
-    const mobile = document.getElementById("q-mobile").value.trim();
-    const city = document.getElementById("q-city").value.trim();
-    const projectType = document.getElementById("q-project-type").value;
-    const area = document.getElementById("q-area").value.trim();
-    const budget = document.getElementById("q-budget").value.trim();
-    const notes = document.getElementById("q-notes").value.trim();
-
-    if (!name || !mobile || !city || !projectType || !area) {
-        showToast("Please fill all required fields (*)");
-        return;
-    }
-    if (!/^\d{10}$/.test(mobile)) {
-        showToast("Please enter a valid 10-digit mobile number");
-        return;
-    }
-
-    const message =
-`🌱 *Instant Quote Request — depthnova Gardens*
-
-Name: ${name}
-Mobile: ${mobile}
-City: ${city}
-Project Type: ${projectType}
-Area Size: ${area}
-Budget: ${budget || "Not specified"}
-${uploadedQuoteImageName ? "Site Photo: " + uploadedQuoteImageName + " (I'll share the photo here on WhatsApp)" : ""}
-
-Notes: ${notes || "-"}
-
-Please share a quote for my project. Thank you!`;
-
-    openWhatsAppMessage(message);
-    closeSheet("quote-sheet-overlay");
-    showToast("Request sent on WhatsApp!");
-}
-
-// ------------------------------------------------------
-// PART 15 — SUBSCRIPTION PLANS
-// ------------------------------------------------------
-function selectPlan(planId) {
-    selectedPlan = planId;
-    document.getElementById("plan-basic").classList.toggle("selected", planId === "basic");
-    document.getElementById("plan-premium").classList.toggle("selected", planId === "premium");
-    document.querySelectorAll(".plan-radio i").forEach(i => i.style.display = "none");
-    const activePlan = document.getElementById("plan-" + planId);
-    if (activePlan) activePlan.querySelector(".plan-radio i").style.display = "block";
-}
-
-function subscribePlan() {
-    const planName = selectedPlan === "premium"
-        ? "Premium Plan (Weekly maintenance, health check, pest inspection, watering inspection, fertilizer guidance, cleaning & small issue fixing)"
-        : "Basic Plan (One visit every 7 days)";
-    const message = `🪴 *Plant Care Subscription Request — depthnova Gardens*\n\nI'd like to subscribe to the:\n${planName}\n\nPlease share the pricing and next steps.`;
-    openWhatsAppMessage(message);
-    showToast("Subscription request sent on WhatsApp!");
-}
-
-// ------------------------------------------------------
-// PART 16 — REVIEWS + GALLERY RENDER
-// ------------------------------------------------------
-function renderReviews(containerId) {
-    const el = document.getElementById(containerId);
-    if (!el) return;
-    el.innerHTML = reviewsData.map(r => `
-      <div class="review-card">
-        <div class="review-top">
-          <div class="review-avatar" style="background-image:url('${r.avatar}')"></div>
-          <div>
-            <div class="review-name">${r.name}</div>
-            <div class="review-stars">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</div>
-          </div>
-        </div>
-        <p class="review-text">${r.text}</p>
-      </div>
-    `).join("");
-}
-
-function renderGallery() {
-    const el = document.getElementById("gallery-grid");
-    if (!el) return;
-    el.innerHTML = galleryImages.map(g => `
-      <div class="gallery-tile ${g.wide ? "wide" : ""}" style="background-image:url('https://picsum.photos/seed/${g.seed}/700/500')"></div>
-    `).join("");
-}
-
-// ------------------------------------------------------
-// PART 17 — SERVICES RENDER
-// ------------------------------------------------------
-function renderServicesGrid(containerId) {
-    const el = document.getElementById(containerId);
-    if (!el) return;
-    el.innerHTML = servicesData.map(s => `
-      <div class="service-tile" onclick="openHomeCategoryInfo('${s.name}')">
-        <div class="service-tile-icon"><i class="fa-solid ${s.icon}"></i></div>
-        <p>${s.name}</p>
-      </div>
-    `).join("");
-}
-
-// ------------------------------------------------------
-// PART 18 — CONTACT ACTIONS
-// ------------------------------------------------------
-function contactWhatsApp() {
-    openWhatsAppMessage("Hi depthnova Gardens, I'd like to know more about your services.");
-}
-
-function contactCall() {
-    window.location.href = `tel:+${WHATSAPP_NUMBER}`;
-}
-
-function contactEmail() {
-    window.location.href = "mailto:depthnovacustomersupport@gmail.com";
-}
-
-function openWhatsAppMessage(message) {
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-    window.open(url, "_blank");
-}
-
-// ------------------------------------------------------
-// PART 19 — POLICY SHEETS (About / Privacy / Terms)
-// ------------------------------------------------------
-const policyContent = {
-    about: {
-        title: "About Us",
-        body: `
-        <p><strong>depthnova Gardens</strong> is a farm house & garden decoration studio and online plant nursery, helping homes, farm houses and offices turn empty spaces into thriving green environments.</p>
-        <h4>What We Do</h4>
-        <p>We design and build complete outdoor spaces — from farm house decoration and garden design to landscaping, lawns, vertical gardens, water features and irrigation systems. Alongside our project work, our online plant store delivers healthy indoor and outdoor plants, pots, fertilizers and gardening tools straight to your door.</p>
-        <h4>Our Promise</h4>
-        <p>Every plant we sell and every project we take on is backed by our in-house horticulture team. We also offer ongoing Plant Care Subscription plans so your garden keeps looking its best long after installation day.</p>
-        <h4>Get In Touch</h4>
-        <p>Reach us anytime on WhatsApp or phone at +91 93116 49629, or email depthnovacustomersupport@gmail.com for quotes, orders or support.</p>`
+  openRazorpay({
+    amount: 3500, // ₹35.00 in paise
+    name: "depthnova — Custom Depth Wallpaper",
+    description: "AI generated depth wallpaper",
+    onSuccess: () => {
+      showToast("Order placed! We'll notify you when it's ready.");
+      clearOrderImage();
+      const msgInput = document.getElementById("order-message");
+      if (msgInput) msgInput.value = "";
+      switchTab("request", document.getElementById("nav-request"));
     },
-    privacy: {
-        title: "Privacy Policy",
-        body: `
-        <p>This Privacy Policy explains how depthnova Gardens ("we", "us") collects and uses information when you use this website.</p>
-        <h4>Information We Collect</h4>
-        <p>When you place an order, request a quote or contact us, we collect details you provide directly — such as your name, mobile number, email, delivery address and project information. Cart and wishlist selections are stored only in your browser session and are not transmitted to any server unless you submit an order or quote request.</p>
-        <h4>How We Use Your Information</h4>
-        <p>Order and quote details you submit are sent directly to our business WhatsApp number to process your order, prepare a quote, or respond to your enquiry. We do not sell or share your personal information with third parties for marketing purposes.</p>
-        <h4>Payments</h4>
-        <p>Online payments made through Razorpay are processed by Razorpay's secure payment gateway. We do not store your card, UPI or banking details on our systems.</p>
-        <h4>Contact</h4>
-        <p>For any privacy-related questions, please email depthnovacustomersupport@gmail.com.</p>`
-    },
-    terms: {
-        title: "Terms & Conditions",
-        body: `
-        <p>By using this website and placing an order or quote request, you agree to the following terms.</p>
-        <h4>Orders & Pricing</h4>
-        <p>Product prices, discounts and delivery charges shown are correct at the time of listing and may change without prior notice. Orders placed via WhatsApp are confirmed by our team before dispatch.</p>
-        <h4>Plants & Delivery</h4>
-        <p>Plants are living products and their appearance may vary slightly from photos shown. We take care to pack and deliver plants safely; please inspect your order on delivery and report any issues to us within 24 hours.</p>
-        <h4>Services & Quotes</h4>
-        <p>Instant Quote requests are estimates based on the information and photos you provide. A final quote is confirmed only after our team reviews your requirements or completes a site visit where required.</p>
-        <h4>Subscriptions</h4>
-        <p>Plant Care Subscription plans renew as per the schedule agreed with our team at the time of subscribing and can be cancelled by contacting us on WhatsApp.</p>
-        <h4>Payments</h4>
-        <p>Online payments are securely processed via Razorpay. Cash-on-delivery/WhatsApp-confirmed orders are settled as agreed with our team at the time of order confirmation.</p>`
+  });
+}
+
+/* =========================================================
+   Settings — preferences
+   ========================================================= */
+function toggleSetting(row, key) {
+  const toggle = document.getElementById(`toggle-${key}`);
+  if (!toggle) return;
+  const isOn = toggle.classList.toggle("on");
+
+  if (key === "clock24") {
+    state.use24Hour = isOn;
+    const formatDesc = document.getElementById("clock-format-desc");
+    if (formatDesc) {
+      formatDesc.textContent = isOn
+        ? "24-hour format (14:30)"
+        : "12-hour format (2:30 PM)";
     }
+  }
+}
+
+/* =========================================================
+   Support — email & telegram
+   ========================================================= */
+function contactSupportEmail() {
+  window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("depthnova support")}`;
+}
+
+function contactSupportTelegram() {
+  window.open(TELEGRAM_URL, "_blank", "noopener");
+}
+
+/* =========================================================
+   Payments (Razorpay for Custom Orders)
+   ========================================================= */
+function openRazorpay({ amount, name, description, onSuccess }) {
+  if (typeof Razorpay === "undefined") {
+    showToast("Payments unavailable right now");
+    return;
+  }
+
+  const options = {
+    key: RAZORPAY_KEY_ID,
+    amount,
+    currency: "INR",
+    name,
+    description,
+    prefill: {
+      name: "",
+      email: "",
+    },
+    theme: { color: "#1a6cf0" },
+    handler: function (response) {
+      onSuccess?.(response);
+    },
+    modal: {
+      ondismiss: function () {
+        showToast("Payment cancelled");
+      },
+    },
+  };
+
+  const rzp = new Razorpay(options);
+  rzp.on("payment.failed", function () {
+    showToast("Payment failed, please try again");
+  });
+  rzp.open();
+}
+
+/* =========================================================
+   WALLPAPER EDITOR SCREEN (All Fully Unlocked & Free)
+   ========================================================= */
+
+const EDITOR_MAIN_TABS = [
+  { id: "clock", label: "Clock", icon: "fa-solid fa-clock", locked: false },
+  { id: "date", label: "Date", icon: "fa-solid fa-calendar-days", locked: false },
+  { id: "text", label: "Text", icon: "fa-solid fa-font", locked: false },
+  { id: "stroke", label: "", icon: "fa-solid fa-slash", locked: false },
+  { id: "parallax", label: "Parallax", icon: "fa-solid fa-cube", locked: false },
+];
+
+const EDITOR_SUB_TABS = [
+  { id: "format", label: "Format", locked: false },
+  { id: "typography", label: "Typography", locked: false },
+  { id: "colors", label: "Colors", locked: false },
+  { id: "position", label: "Position", locked: false },
+  { id: "effects", label: "Effects", locked: false },
+  { id: "transform", label: "Transform", locked: false },
+];
+
+const TIME_FORMATS = [
+  { id: "hhmm", label: "hhmm" },
+  { id: "hh mm", label: "hh mm" },
+  { id: "hh:mm", label: "hh:mm" },
+  { id: "hh.mm", label: "hh.mm" },
+  { id: "hh mm ss", label: "hh mm ss" },
+  { id: "hhmmss", label: "hhmmss" },
+  { id: "hh:mm:ss", label: "hh:mm:ss" },
+  { id: "hh.mm.ss", label: "hh.mm.ss" },
+  { id: "h:mm", label: "h:mm" },
+  { id: "hmm", label: "hmm" },
+];
+
+const DATE_FORMATS = [
+  { id: "dd MMM yyyy", label: "dd MMM yyyy" },
+  { id: "MMM dd, yyyy", label: "MMM dd, yyyy" },
+  { id: "yyyy-MM-dd", label: "yyyy-MM-dd" },
+  { id: "EEEE MMMM dd", label: "EEEE MMMM dd" },
+];
+
+const MONTH_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTH_LONG = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const WEEKDAY_LONG = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+state.editor = {
+  wallpaper: null,
+  returnTab: "explore",
+  activeMainTab: "clock",
+  activeSubTab: "format",
+  showClock: true,
+  timeFormat: "hhmm",
+  showDate: true,
+  dateFormat: "dd MMM yyyy",
+  dateUppercase: false,
+  posX: 0,
+  posY: 0,
+  layeringDepth: false,
+  showOverForeground: false,
+  showOverForegroundHour: false,
+  showOverForegroundMinute: false,
+  rotX: 0,
+  rotY: 0,
+  skewH: 0,
+  skewV: 0,
+  rotAngle: 0,
+  stretchH: 100,
 };
 
-function openPolicySheet(type) {
-    const content = policyContent[type];
-    if (!content) return;
-    document.getElementById("policy-sheet-title").innerText = content.title;
-    document.getElementById("policy-sheet-body").innerHTML = content.body;
-    document.getElementById("policy-sheet-overlay").classList.add("active");
+const POSITION_SLIDERS = [
+  { key: "posX", label: "Horizontal Position", min: -100, max: 100, step: 0.1, default: 0 },
+  { key: "posY", label: "Vertical Position", min: -100, max: 100, step: 0.1, default: 0 },
+];
+const TRANSFORM_PERSPECTIVE_SLIDERS = [
+  { key: "rotX", label: "X-Axis Rotation", min: -45, max: 45, step: 0.1, default: 0 },
+  { key: "rotY", label: "Y-Axis Rotation", min: -45, max: 45, step: 0.1, default: 0 },
+];
+const TRANSFORM_SKEW_SLIDERS = [
+  { key: "skewV", label: "Top → Bottom", min: -45, max: 45, step: 0.1, default: 0, group: "Top/Bottom Skew" },
+  { key: "skewH", label: "Left → Right", min: -45, max: 45, step: 0.1, default: 0, group: "Left/Right Skew" },
+];
+const TRANSFORM_ROTSTRETCH_SLIDERS = [
+  { key: "rotAngle", label: "Rotation Angle", min: -180, max: 180, step: 1, default: 0 },
+  { key: "stretchH", label: "Horizontal Stretch", min: 50, max: 200, step: 1, default: 100 },
+];
+let editorClockInterval = null;
+
+function openEditorScreen(wp) {
+  state.editor.wallpaper = wp;
+  state.editor.returnTab = state.activeTab;
+  state.editor.activeMainTab = "clock";
+  state.editor.activeSubTab = "format";
+
+  const titleEl = document.getElementById("editor-title");
+  if (titleEl) titleEl.textContent = wp.title;
+  const previewImg = document.getElementById("editor-preview-img");
+  if (previewImg) previewImg.style.backgroundImage = `url('${wp.img}')`;
+  document.getElementById("editor-fav-btn")?.classList.toggle("favorited", state.favorites.has(wp.id));
+
+  switchTab("editor", null);
+  renderEditorMainTabs();
+  renderEditorSubTabs();
+  renderEditorPanel();
+  startEditorClock();
+  applyEditorTransform();
 }
 
-function closePolicySheet() {
-    document.getElementById("policy-sheet-overlay").classList.remove("active");
+function closeEditorScreen() {
+  stopEditorClock();
+  switchTab(state.editor.returnTab || "explore", document.getElementById(`nav-${state.editor.returnTab}`) || document.getElementById("nav-explore"));
 }
 
-// ------------------------------------------------------
-// PART 20 — TOAST
-// ------------------------------------------------------
-function showToast(message) {
-    if (!toastEl) { console.log(message); return; }
-    toastEl.innerText = message;
-    toastEl.classList.add("show");
-    clearTimeout(window.toastTimer);
-    window.toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2500);
+function startEditorClock() {
+  stopEditorClock();
+  tickEditorPreview();
+  editorClockInterval = setInterval(tickEditorPreview, 1000);
+}
+function stopEditorClock() {
+  if (editorClockInterval) clearInterval(editorClockInterval);
+  editorClockInterval = null;
+}
+
+function pad2(n) { return String(n).padStart(2, "0"); }
+
+function formatEditorTime(now, formatId) {
+  const h = pad2(now.getHours());
+  const m = pad2(now.getMinutes());
+  const s = pad2(now.getSeconds());
+  switch (formatId) {
+    case "hh mm": return `${h} ${m}`;
+    case "hh:mm": return `${h}:${m}`;
+    case "hh.mm": return `${h}.${m}`;
+    case "hh mm ss": return `${h} ${m} ${s}`;
+    case "hhmmss": return `${h}${m}${s}`;
+    case "hh:mm:ss": return `${h}:${m}:${s}`;
+    case "hh.mm.ss": return `${h}.${m}.${s}`;
+    case "h:mm": return `${now.getHours()}:${m}`;
+    case "hmm": return `${now.getHours()}${m}`;
+    case "hhmm":
+    default: return `${h}${m}`;
+  }
+}
+
+function formatEditorDate(now, formatId, uppercase) {
+  const dd = pad2(now.getDate());
+  const MMM = MONTH_SHORT[now.getMonth()];
+  const MMMM = MONTH_LONG[now.getMonth()];
+  const EEEE = WEEKDAY_LONG[now.getDay()];
+  const yyyy = now.getFullYear();
+  const MM = pad2(now.getMonth() + 1);
+  let out;
+  switch (formatId) {
+    case "MMM dd, yyyy": out = `${MMM} ${dd}, ${yyyy}`; break;
+    case "yyyy-MM-dd": out = `${yyyy}-${MM}-${dd}`; break;
+    case "EEEE MMMM dd": out = `${EEEE} ${MMMM} ${dd}`; break;
+    case "dd MMM yyyy":
+    default: out = `${dd} ${MMM} ${yyyy}`; break;
+  }
+  return uppercase ? out.toUpperCase() : out;
+}
+
+function formatSliderVal(val, step) {
+  return step >= 1 ? String(Math.round(val)) : (Math.round(val * 10) / 10).toFixed(1);
+}
+function clampVal(v, min, max) {
+  return Math.min(max, Math.max(min, v));
+}
+function editorSliderRowHtml(def) {
+  const val = state.editor[def.key] != null ? state.editor[def.key] : def.default;
+  const pct = ((val - def.min) / (def.max - def.min)) * 100;
+  return `
+    <div class="editor-slider-block">
+      <div class="editor-slider-toprow">
+        <span class="editor-slider-name">${def.label}</span>
+      </div>
+      <div class="editor-slider-controls">
+        <div class="slider-step-btn" onclick="adjustEditorSlider('${def.key}', ${def.min}, ${def.max}, ${def.step}, -1)"><i class="fa-solid fa-minus"></i></div>
+        <div class="slider-value-box" id="val-${def.key}">${formatSliderVal(val, def.step)}</div>
+        <div class="slider-step-btn" onclick="adjustEditorSlider('${def.key}', ${def.min}, ${def.max}, ${def.step}, 1)"><i class="fa-solid fa-plus"></i></div>
+        <div class="slider-reset-btn" onclick="resetEditorSlider('${def.key}', ${def.default})"><i class="fa-solid fa-arrows-rotate"></i></div>
+      </div>
+      <input type="range" class="editor-range" id="range-${def.key}"
+        min="${def.min}" max="${def.max}" step="${def.step}" value="${val}"
+        oninput="setEditorSlider('${def.key}', this.value)"
+        style="background: linear-gradient(to right, var(--primary-color) ${pct}%, #e2e8f0 ${pct}%)" />
+    </div>
+  `;
+}
+function updateSliderRowUI(key, min, max, step) {
+  const input = document.getElementById(`range-${key}`);
+  const box = document.getElementById(`val-${key}`);
+  if (!input || !box) return;
+  const val = state.editor[key];
+  const pct = ((val - min) / (max - min)) * 100;
+  input.value = val;
+  input.style.background = `linear-gradient(to right, var(--primary-color) ${pct}%, #e2e8f0 ${pct}%)`;
+  box.textContent = formatSliderVal(val, step);
+}
+function adjustEditorSlider(key, min, max, step, dir) {
+  const cur = state.editor[key] != null ? state.editor[key] : 0;
+  state.editor[key] = clampVal(Math.round((cur + dir * step) * 10) / 10, min, max);
+  updateSliderRowUI(key, min, max, step);
+  applyEditorTransform();
+}
+function setEditorSlider(key, value) {
+  state.editor[key] = parseFloat(value);
+  const input = document.getElementById(`range-${key}`);
+  if (input) {
+    updateSliderRowUI(key, parseFloat(input.min), parseFloat(input.max), parseFloat(input.step));
+  }
+  applyEditorTransform();
+}
+function resetEditorSlider(key, def) {
+  state.editor[key] = def;
+  const input = document.getElementById(`range-${key}`);
+  if (input) updateSliderRowUI(key, parseFloat(input.min), parseFloat(input.max), parseFloat(input.step));
+  applyEditorTransform();
+}
+
+function applyEditorTransform() {
+  const overlay = document.getElementById("editor-preview-overlay");
+  if (!overlay) return;
+  const ed = state.editor;
+  const tx = ed.posX || 0;
+  const ty = ed.posY || 0;
+  const rotX = ed.rotX || 0;
+  const rotY = ed.rotY || 0;
+  const skewH = ed.skewH || 0;
+  const skewV = ed.skewV || 0;
+  const rotAngle = ed.rotAngle || 0;
+  const stretchH = ed.stretchH != null ? ed.stretchH : 100;
+  overlay.style.transform =
+    `translate(${tx}%, ${ty}%) perspective(700px) rotateX(${rotX}deg) rotateY(${rotY}deg) ` +
+    `rotate(${rotAngle}deg) skew(${skewH}deg, ${skewV}deg) scaleX(${stretchH / 100})`;
+}
+
+function tickEditorPreview() {
+  const now = new Date();
+  const clockEl = document.getElementById("editor-preview-clock");
+  const dateEl = document.getElementById("editor-preview-date");
+  if (!clockEl || !dateEl) return;
+
+  const ed = state.editor;
+  if (ed.showClock) {
+    const h = pad2(now.getHours());
+    const rest = formatEditorTime(now, ed.timeFormat).slice(h.length);
+    clockEl.innerHTML = `${h}<span class="clk-accent">${rest}</span>`;
+    clockEl.style.display = "";
+  } else {
+    clockEl.style.display = "none";
+  }
+
+  if (ed.showDate) {
+    dateEl.textContent = formatEditorDate(now, ed.dateFormat, ed.dateUppercase);
+    dateEl.style.display = "";
+  } else {
+    dateEl.style.display = "none";
+  }
+}
+
+function renderEditorMainTabs() {
+  const el = document.getElementById("editor-maintabs");
+  if (!el) return;
+  const active = state.editor.activeMainTab;
+  el.innerHTML = EDITOR_MAIN_TABS.map((t) => `
+    <div class="editor-maintab ${active === t.id ? "active" : ""}" onclick="selectEditorMainTab('${t.id}')">
+      <i class="${t.icon}"></i>${t.label ? `<span>${t.label}</span>` : ""}
+    </div>
+  `).join("") + `
+    <div class="editor-maintab reset-btn" onclick="resetEditorSettings()"><i class="fa-solid fa-arrows-rotate"></i></div>
+  `;
+}
+
+function selectEditorMainTab(id) {
+  state.editor.activeMainTab = id;
+  state.editor.activeSubTab = "format";
+  renderEditorMainTabs();
+  renderEditorSubTabs();
+  renderEditorPanel();
+}
+
+function renderEditorSubTabs() {
+  const el = document.getElementById("editor-subtabs");
+  if (!el) return;
+  el.style.display = "flex";
+
+  const active = state.editor.activeSubTab;
+  el.innerHTML = EDITOR_SUB_TABS.map((t) => `
+    <div class="editor-subtab ${active === t.id ? "active" : ""}" onclick="selectEditorSubTab('${t.id}')">
+      ${t.label}
+    </div>
+  `).join("");
+}
+
+function selectEditorSubTab(id) {
+  state.editor.activeSubTab = id;
+  renderEditorSubTabs();
+  renderEditorPanel();
+}
+
+function renderEditorPanel() {
+  const el = document.getElementById("editor-panel");
+  if (!el) return;
+
+  if (state.editor.activeSubTab === "format") {
+    el.innerHTML = state.editor.activeMainTab === "date" ? dateFormatPanelHtml() : clockFormatPanelHtml();
+  } else if (state.editor.activeSubTab === "position") {
+    el.innerHTML = positionPanelHtml();
+  } else if (state.editor.activeSubTab === "transform") {
+    el.innerHTML = transformPanelHtml();
+  } else {
+    el.innerHTML = `<div style="text-align:center;padding:30px;color:var(--text-muted);">Custom settings for this tab.</div>`;
+  }
+}
+
+function clockFormatPanelHtml() {
+  const ed = state.editor;
+  return `
+    <div class="editor-panel-row">
+      <div class="editor-panel-row-text"><h4>Show Clock</h4></div>
+      <div class="toggle-switch ${ed.showClock ? "on" : ""}" onclick="toggleEditorFlag('showClock')"></div>
+    </div>
+    <div class="editor-section-label">Time Format</div>
+    <div class="editor-format-grid">
+      ${TIME_FORMATS.map((f) => `
+        <div class="editor-format-btn ${ed.timeFormat === f.id ? "active" : ""}" onclick="selectTimeFormat('${f.id}')">${f.label}</div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function dateFormatPanelHtml() {
+  const ed = state.editor;
+  return `
+    <div class="editor-panel-row">
+      <div class="editor-panel-row-text"><h4>Show Date</h4></div>
+      <div class="toggle-switch ${ed.showDate ? "on" : ""}" onclick="toggleEditorFlag('showDate')"></div>
+    </div>
+    <div class="editor-section-label">Date Format</div>
+    ${DATE_FORMATS.map((f) => `
+      <div class="editor-list-option ${ed.dateFormat === f.id ? "active" : ""}" onclick="selectDateFormat('${f.id}')">${f.label}</div>
+    `).join("")}
+    <div class="editor-section-label" style="margin-top:18px;">Text Style</div>
+    <div class="editor-panel-row">
+      <div class="editor-panel-row-text"><h4>All Uppercase</h4></div>
+      <div class="toggle-switch ${ed.dateUppercase ? "on" : ""}" onclick="toggleEditorFlag('dateUppercase')"></div>
+    </div>
+  `;
+}
+
+function positionPanelHtml() {
+  const ed = state.editor;
+  return `
+    <div class="editor-section-label">Position</div>
+    ${editorSliderRowHtml(POSITION_SLIDERS[0])}
+    ${editorSliderRowHtml(POSITION_SLIDERS[1])}
+
+    <div class="editor-section-label" style="margin-top:22px;">Layering (Depth)</div>
+    <div class="editor-panel-row">
+      <div class="editor-panel-row-text">
+        <h4>Layering (Depth)</h4>
+        <p>Places this element on its own depth layer for a parallax effect.</p>
+      </div>
+      <div class="toggle-switch ${ed.layeringDepth ? "on" : ""}" onclick="toggleEditorFlag('layeringDepth')"></div>
+    </div>
+    <div class="editor-panel-row">
+      <div class="editor-panel-row-text">
+        <h4>Show Over Foreground</h4>
+        <p>Clock appears BEHIND foreground elements (sandwiched).</p>
+      </div>
+      <div class="toggle-switch ${ed.showOverForeground ? "on" : ""}" onclick="toggleEditorFlag('showOverForeground')"></div>
+    </div>
+    <div class="editor-panel-row">
+      <div class="editor-panel-row-text"><h4>Show Over Foreground (for Hour)</h4></div>
+      <div class="toggle-switch ${ed.showOverForegroundHour ? "on" : ""}" onclick="toggleEditorFlag('showOverForegroundHour')"></div>
+    </div>
+    <div class="editor-panel-row">
+      <div class="editor-panel-row-text"><h4>Show Over Foreground (for Minute)</h4></div>
+      <div class="toggle-switch ${ed.showOverForegroundMinute ? "on" : ""}" onclick="toggleEditorFlag('showOverForegroundMinute')"></div>
+    </div>
+  `;
+}
+
+function transformPanelHtml() {
+  return `
+    <div class="editor-section-label">Perspective</div>
+    ${editorSliderRowHtml(TRANSFORM_PERSPECTIVE_SLIDERS[0])}
+    ${editorSliderRowHtml(TRANSFORM_PERSPECTIVE_SLIDERS[1])}
+
+    <div class="editor-section-label" style="margin-top:22px;">Skew</div>
+    <div class="editor-section-sub-label">Top/Bottom Skew</div>
+    ${editorSliderRowHtml(TRANSFORM_SKEW_SLIDERS[0])}
+    <div class="editor-section-sub-label">Left/Right Skew</div>
+    ${editorSliderRowHtml(TRANSFORM_SKEW_SLIDERS[1])}
+
+    <div class="editor-section-label" style="margin-top:22px;">Rotation &amp; Stretch</div>
+    ${editorSliderRowHtml(TRANSFORM_ROTSTRETCH_SLIDERS[0])}
+    ${editorSliderRowHtml(TRANSFORM_ROTSTRETCH_SLIDERS[1])}
+  `;
+}
+
+function toggleEditorFlag(key) {
+  state.editor[key] = !state.editor[key];
+  renderEditorPanel();
+  tickEditorPreview();
+}
+
+function selectTimeFormat(id) {
+  state.editor.timeFormat = id;
+  renderEditorPanel();
+  tickEditorPreview();
+}
+
+function selectDateFormat(id) {
+  state.editor.dateFormat = id;
+  renderEditorPanel();
+  tickEditorPreview();
+}
+
+function resetEditorSettings() {
+  state.editor.showClock = true;
+  state.editor.timeFormat = "hhmm";
+  state.editor.showDate = true;
+  state.editor.dateFormat = "dd MMM yyyy";
+  state.editor.dateUppercase = false;
+  state.editor.posX = 0;
+  state.editor.posY = 0;
+  state.editor.layeringDepth = false;
+  state.editor.showOverForeground = false;
+  state.editor.showOverForegroundHour = false;
+  state.editor.showOverForegroundMinute = false;
+  state.editor.rotX = 0;
+  state.editor.rotY = 0;
+  state.editor.skewH = 0;
+  state.editor.skewV = 0;
+  state.editor.rotAngle = 0;
+  state.editor.stretchH = 100;
+  renderEditorPanel();
+  tickEditorPreview();
+  applyEditorTransform();
+  showToast("Reset to default");
+}
+
+function toggleFavoriteEditor() {
+  const wp = state.editor.wallpaper;
+  if (!wp) return;
+  if (state.favorites.has(wp.id)) state.favorites.delete(wp.id);
+  else state.favorites.add(wp.id);
+  document.getElementById("editor-fav-btn")?.classList.toggle("favorited", state.favorites.has(wp.id));
+  renderWallpapers();
+  renderSamples();
+  renderCategoryDetailGrid();
+}
+
+function applyEditorWallpaper() {
+  const wp = state.editor.wallpaper;
+  if (!wp) return;
+  requestSetWallpaperFromEditor(wp);
+}
+
+function requestSetWallpaperFromEditor(wp) {
+  if (window.NativeBridge && typeof window.NativeBridge.setWallpaper === "function") {
+    try {
+      window.NativeBridge.setWallpaper(wp.img);
+      showToast(`"${wp.title}" set as wallpaper`);
+      return;
+    } catch (err) {
+      console.error("Native setWallpaper failed: " + err.message);
+    }
+  }
+
+  showToast("Browsers can't set wallpaper directly — downloading image…");
+  performDownload(wp);
+  setTimeout(() => {
+    showToast("Open it from your gallery, then tap 'Set as wallpaper'");
+  }, 2400);
 }
