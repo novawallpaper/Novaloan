@@ -4,8 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>depthnova Gardens — Farm House, Garden Decor &amp; Plant Nursery</title>
-    <meta name="description" content="depthnova Gardens — Farm House &amp; Garden Decoration, Landscaping, Plant Nursery and Online Plant Store." />
+    <title>Mitti Manor — Premium Wallpaper</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -20,6 +19,9 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
     />
 
+    <!-- EmailJS (sends emails if needed) -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
     <link rel="stylesheet" href="style.css" />
   </head>
 
@@ -27,218 +29,300 @@
     <div class="app-container">
 
       <!-- ========================= -->
-      <!-- HOME SCREEN -->
+      <!-- CATEGORIES SCREEN -->
       <!-- ========================= -->
 
-      <div id="screen-home" class="screen-content active">
-        <div class="top-appbar">
-          <div class="brand-mark">
-            <div class="brand-icon">DN</div>
-            <div class="brand-text">
-              <h1>depthnova Gardens</h1>
-              <p>Grow Beautiful. Live Green.</p>
-            </div>
-          </div>
-          <div class="appbar-icons">
-            <div class="appbar-icon-btn" id="wishlist-icon-btn" onclick="openWishlistSheet()">
-              <i class="fa-solid fa-heart"></i>
-            </div>
-            <div class="appbar-icon-btn" onclick="switchTab('cart', document.getElementById('nav-cart'))">
-              <i class="fa-solid fa-cart-shopping"></i>
-              <span class="appbar-badge" id="cart-badge-home">0</span>
-            </div>
-          </div>
+      <div id="screen-categories" class="screen-content">
+        <div class="page-header">
+          <h1>Collection</h1>
         </div>
 
-        <div class="hero-card" style="background-image:url('https://picsum.photos/seed/farmhouse-hero/900/1200')">
-          <span class="hero-eyebrow"><i class="fa-solid fa-seedling"></i> Farm House &amp; Garden Specialists</span>
-          <div class="hero-content">
-            <h1>Design Your Dream Farm House &amp; Garden</h1>
-            <p>Premium landscaping, garden decoration and plant nursery — all under one roof. From concept to full bloom.</p>
-            <div class="hero-btn-row">
-              <button class="hero-btn-primary" onclick="openQuoteSheet()"><i class="fa-solid fa-bolt"></i> Get Instant Quote</button>
-              <button class="hero-btn-secondary" onclick="switchTab('shop', document.getElementById('nav-shop'))">Shop Plants</button>
-            </div>
-          </div>
-        </div>
+        <p class="category-subtitle"></p>
 
-        <div class="section-head-row">
-          <h2>Explore</h2>
-        </div>
-        <div class="home-cat-scroll">
-          <div class="home-cat-card" style="background-image:url('https://picsum.photos/seed/farmhousedecor/500/700')" onclick="openHomeCategoryInfo('Farm House Decoration')">
-            <span>Farm House Decoration</span>
-          </div>
-          <div class="home-cat-card" style="background-image:url('https://picsum.photos/seed/gardendecor/500/700')" onclick="openHomeCategoryInfo('Garden Decoration')">
-            <span>Garden Decoration</span>
-          </div>
-          <div class="home-cat-card" style="background-image:url('https://picsum.photos/seed/landscaping1/500/700')" onclick="openHomeCategoryInfo('Landscaping')">
-            <span>Landscaping</span>
-          </div>
-          <div class="home-cat-card" style="background-image:url('https://picsum.photos/seed/plantnursery1/500/700')" onclick="switchTab('shop', document.getElementById('nav-shop'))">
-            <span>Plant Nursery</span>
-          </div>
-        </div>
-
-        <div class="custom-card cta-green">
-          <div class="custom-card-header">
-            <div class="sparkle-icon"><i class="fa-solid fa-leaf"></i></div>
-          </div>
-          <h2>Free Site Visit &amp; Design Consultation</h2>
-          <p>Tell us about your space and get a personalised quote on WhatsApp within minutes.</p>
-          <button class="cta-quote-btn" onclick="openQuoteSheet()"><i class="fa-brands fa-whatsapp"></i> Get Instant Quote</button>
-        </div>
-
-        <div class="section-head-row">
-          <h2>Popular Plants</h2>
-          <span class="view-all-link" onclick="switchTab('shop', document.getElementById('nav-shop'))">View All</span>
-        </div>
-        <div class="product-grid" id="home-popular-grid"></div>
-
-        <div class="section-head-row">
-          <h2>Our Services</h2>
-          <span class="view-all-link" onclick="switchTab('more', document.getElementById('nav-more'))">View All</span>
-        </div>
-        <div class="services-grid" id="home-services-grid"></div>
-
-        <div class="section-head-row">
-          <h2>Customer Reviews</h2>
-        </div>
-        <div class="review-scroll" id="home-review-scroll"></div>
+        <div class="carousel-container" id="collection-carousel"></div>
       </div>
 
       <!-- ========================= -->
-      <!-- SHOP SCREEN -->
+      <!-- CATEGORY DETAIL SCREEN -->
       <!-- ========================= -->
 
-      <div id="screen-shop" class="screen-content">
+      <div id="screen-category-detail" class="screen-content">
+        <div class="cat-detail-header">
+          <div class="back-btn" onclick="switchTab('categories', document.getElementById('nav-categories'))">
+            <i class="fa-solid fa-chevron-left"></i>
+          </div>
+          <h1 id="cat-detail-title">Category</h1>
+          <button class="cat-unlock-btn" onclick="openPremiumScreen()">
+            <i class="fa-solid fa-lock"></i> Unlock
+          </button>
+        </div>
+
+        <div class="cat-tabs">
+          <div class="cat-tab active" data-cat-filter="all" onclick="switchCatTab(this)">All</div>
+          <div class="cat-tab" data-cat-filter="premium" onclick="switchCatTab(this)">Premium</div>
+          <div class="cat-tab" data-cat-filter="free" onclick="switchCatTab(this)">Free</div>
+        </div>
+
+        <div class="wallpaper-grid" id="cat-detail-grid"></div>
+      </div>
+
+      <!-- ========================= -->
+      <!-- SHOPPING PRODUCT DETAIL SCREEN -->
+      <!-- ========================= -->
+
+      <div id="screen-editor" class="screen-content editor-screen">
+        <div class="editor-header">
+          <div class="back-btn" onclick="closeEditorScreen()">
+            <i class="fa-solid fa-chevron-left"></i>
+          </div>
+          <h1>Product Details</h1>
+          <div class="editor-fav-btn" id="editor-fav-btn" onclick="showToast('Opening WhatsApp...')">
+            <i class="fa-brands fa-whatsapp"></i>
+          </div>
+        </div>
+
+        <div class="shop-product-container" style="padding: 16px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; height: calc(100% - 70px);">
+          <!-- Product Images Swipeable Carousel -->
+          <div class="shop-image-slider" style="position: relative; width: 100%; height: 350px; border-radius: 16px; overflow: hidden; background: #000;">
+            <div class="slider-track" id="editor-preview-img" style="display: flex; width: 300%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;">
+              <div class="slide-item" style="min-width: 100%; height: 100%; scroll-snap-align: start; background-size: cover; background-position: center;"></div>
+              <div class="slide-item" style="min-width: 100%; height: 100%; scroll-snap-align: start; background-size: cover; background-position: center;"></div>
+              <div class="slide-item" style="min-width: 100%; height: 100%; scroll-snap-align: start; background-size: cover; background-position: center;"></div>
+            </div>
+          </div>
+
+          <!-- Product Info -->
+          <div class="shop-product-info">
+            <h2 id="product-name" style="font-size: 22px; font-weight: 700; margin-bottom: 8px;">Product Name</h2>
+            <div id="product-price" style="font-size: 20px; font-weight: 800; color: var(--primary-color, #6366f1); margin-bottom: 12px;">₹35.00</div>
+            
+            <h3 style="font-size: 14px; font-weight: 600; opacity: 0.7; margin-bottom: 4px;">Description</h3>
+            <p id="product-description" style="font-size: 14px; line-height: 1.5; opacity: 0.9;">
+              This is a premium high-quality wallpaper designed to enhance your device's look with vibrant colors and sharp details.
+            </p>
+          </div>
+
+          <!-- Action Buttons (Buy & Add to Cart) -->
+          <div class="shop-action-buttons" style="display: flex; gap: 12px; margin-top: auto; padding-bottom: 20px;">
+            <button class="add-to-cart-btn" onclick="showToast('Added to Cart')" style="flex: 1; padding: 14px; border-radius: 12px; border: 1px solid currentColor; background: transparent; font-weight: 600; cursor: pointer;">
+              Add to Cart
+            </button>
+            <button class="buy-now-btn" onclick="showToast('Proceeding to Checkout...')" style="flex: 1; padding: 14px; border-radius: 12px; background: #6366f1; color: white; border: none; font-weight: 600; cursor: pointer;">
+              Buy Now
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================= -->
+      <!-- EXPLORE SCREEN (Default Open) -->
+      <!-- ========================= -->
+
+      <div id="screen-explore" class="screen-content active">
         <div class="explore-header">
-          <h1>Plant Shop</h1>
+          <h1 id="explore-title">Mitti Manor</h1>
           <div class="search-box">
-            <input type="text" id="search-input" placeholder="Search plants, pots, tools..." />
+            <input type="text" id="search-input" placeholder="search" />
             <i class="fa-solid fa-magnifying-glass"></i>
           </div>
         </div>
 
-        <div class="shop-cat-bar" id="shop-cat-bar"></div>
+        <div class="sub-categories-bar">
+          <div class="sub-cat-item active" data-filter="grid" onclick="switchSubCat(this)">
+            <i class="fa-solid fa-border-all"></i>
+            <span class="sub-cat-text">Grid</span>
+          </div>
+          <div class="sub-cat-item" data-filter="gift" onclick="switchSubCat(this)">
+            <i class="fa-solid fa-gift"></i>
+            <span class="sub-cat-text">Free</span>
+          </div>
+          <div class="sub-cat-item" data-filter="diamond" onclick="switchSubCat(this)">
+            <i class="fa-solid fa-gem"></i>
+            <span class="sub-cat-text">Premium</span>
+          </div>
+          <div class="sub-cat-item" data-filter="shuffle" onclick="switchSubCat(this)">
+            <i class="fa-solid fa-shuffle"></i>
+            <span class="sub-cat-text">Shuffle</span>
+          </div>
+          <div class="sub-cat-item" data-filter="star" onclick="switchSubCat(this)">
+            <i class="fa-solid fa-star"></i>
+            <span class="sub-cat-text">Favorites</span>
+          </div>
+          <div class="sub-cat-item" data-filter="fire" onclick="switchSubCat(this)">
+            <i class="fa-solid fa-fire"></i>
+            <span class="sub-cat-text">Trending</span>
+          </div>
+        </div>
 
-        <div class="product-grid" id="shop-product-grid"></div>
+        <div class="wallpaper-grid" id="wallpaper-grid-container"></div>
+
+        <div class="fab-heart" onclick="filterByFavoritesQuick()">
+          <i class="fa-solid fa-heart"></i>
+        </div>
       </div>
 
       <!-- ========================= -->
-      <!-- CART SCREEN -->
+      <!-- REQUEST SCREEN -->
       <!-- ========================= -->
 
-      <div id="screen-cart" class="screen-content">
+      <div id="screen-request" class="screen-content">
         <div class="page-header">
-          <h1>My Cart</h1>
+          <h1>Custom Wallpaper</h1>
         </div>
 
-        <div id="cart-items-list"></div>
-
-        <div id="cart-empty-state" class="empty-state" style="display:none;">
-          <i class="fa-solid fa-cart-shopping"></i>
-          <p>Your cart is empty. Add some plants to get started!</p>
+        <div class="custom-card">
+          <div class="custom-card-header">
+            <h3>Order Your Custom</h3>
+            <div class="sparkle-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+          </div>
+          <h2>Depth Wallpaper</h2>
+          <p>Upload your own image and receive a premium AI generated depth wallpaper in ultra HD quality.</p>
+          <div class="privacy-info">
+            <i class="fa-solid fa-lock"></i>
+            <span>Private • Visible only to you</span>
+          </div>
+          <div class="pricing-row">
+            <div class="price-tag">₹35 <span style="font-size: 12px; font-weight: 400; opacity: 0.8">/ Wallpaper</span></div>
+            <button class="order-btn" onclick="openOrderScreen()">Order Now</button>
+          </div>
         </div>
 
-        <div class="cart-summary-card" id="cart-summary-card" style="display:none;">
-          <div class="cart-summary-row"><span>Subtotal</span><span id="cart-subtotal">₹0</span></div>
-          <div class="cart-summary-row"><span>Delivery Charge</span><span id="cart-delivery">₹0</span></div>
-          <div class="cart-summary-row total"><span>Grand Total</span><span id="cart-grand-total">₹0</span></div>
-          <button class="checkout-btn" onclick="openCheckoutSheet()"><i class="fa-solid fa-lock"></i> Proceed to Checkout</button>
-        </div>
+        <div class="section-title">Sample Wallpapers</div>
+        <div id="samples-grid" class="wallpaper-grid"></div>
       </div>
 
       <!-- ========================= -->
-      <!-- MORE SCREEN (Services / Subscription / Gallery / Reviews / Contact / Footer) -->
+      <!-- ORDER WALLPAPER SCREEN -->
       <!-- ========================= -->
 
-      <div id="screen-more" class="screen-content">
+      <div id="screen-order" class="screen-content">
         <div class="page-header">
-          <h1>More</h1>
+          <div class="back-btn" onclick="switchTab('request', document.getElementById('nav-request'))">
+            <i class="fa-solid fa-chevron-left"></i>
+          </div>
+          <h1>Order Depth Wallpaper</h1>
         </div>
 
-        <div class="settings-section-label" id="services">OUR SERVICES</div>
-        <div class="services-grid" id="more-services-grid"></div>
+        <div class="order-info-card">
+          <h3>How it works</h3>
+          <div class="order-step">
+            <div class="order-step-num">1</div>
+            <div class="order-step-text"><h4>Submit &amp; pay</h4><p>Upload your high quality photo and pay via Razorpay.</p></div>
+          </div>
+          <div class="order-step">
+            <div class="order-step-num">2</div>
+            <div class="order-step-text"><h4>We review</h4><p>Our team checks if it's possible to create your wallpaper.</p></div>
+          </div>
+          <div class="order-step">
+            <div class="order-step-num">3</div>
+            <div class="order-step-text"><h4>Craft &amp; deliver</h4><p>We make your wallpaper and notify when it's ready to apply.</p></div>
+          </div>
+          <div class="order-step">
+            <div class="order-step-num">4</div>
+            <div class="order-step-text"><h4>Or full refund</h4><p>If we can't deliver it, you'll get a 100% refund within 48 hours.</p></div>
+          </div>
+        </div>
 
-        <div class="settings-section-label">PLANT CARE SUBSCRIPTION</div>
-        <div class="plan-option" id="plan-basic" onclick="selectPlan('basic')">
-          <div class="plan-badge">POPULAR</div>
-          <div class="plan-radio"><i class="fa-solid fa-check" style="display:none;"></i></div>
+        <div class="order-req-card">
+          <h3>Image Requirements</h3>
+          <p class="order-req-warning">If your image doesn't match these, your order may be rejected.</p>
+
+          <div class="order-req-item">
+            <div class="order-req-icon"><i class="fa-solid fa-image"></i></div>
+            <div class="order-req-text"><h4>Image Size / Ratio</h4><p>Please send a portrait image in 1:2 ratio for the best fit.</p></div>
+          </div>
+          <div class="order-req-item">
+            <div class="order-req-icon"><i class="fa-solid fa-icons"></i></div>
+            <div class="order-req-text"><h4>Image Quality</h4><p>Send a clear HD image. Avoid blurry, low-quality, or pixelated images.</p></div>
+          </div>
+          <div class="order-req-item">
+            <div class="order-req-icon"><i class="fa-solid fa-crosshairs"></i></div>
+            <div class="order-req-text"><h4>Subject Placement</h4><p>Keep the main subject/person in the center or slightly lower area so the clock can be placed properly.</p></div>
+          </div>
+
+          <button class="order-samples-btn" onclick="showToast('Right vs Wrong samples coming soon')">
+            <i class="fa-solid fa-image"></i> See Right vs Wrong Samples
+          </button>
+        </div>
+
+        <div class="section-title">Upload Your Wallpaper</div>
+        <div class="order-upload-box" id="order-upload-box" onclick="triggerImageUpload()">
+          <div class="order-upload-icon"><i class="fa-solid fa-image"></i></div>
+          <h4>Tap to select image</h4>
+          <p>JPG, PNG, WebP • Max 10MB</p>
+        </div>
+        <input type="file" id="order-file-input" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleOrderImageSelect(event)" />
+
+        <div class="section-title">Message (Optional)</div>
+        <textarea class="order-message-box" id="order-message" placeholder="Any specific instructions for the wallpaper..."></textarea>
+
+        <button class="order-pay-btn" id="order-pay-btn" onclick="submitOrderPayment()">Pay ₹35.00 &amp; Send Request</button>
+      </div>
+
+      <!-- ========================= -->
+      <!-- PREMIUM / SUBSCRIPTION SCREEN -->
+      <!-- ========================= -->
+
+      <div id="screen-premium" class="screen-content">
+        <div class="back-btn" style="margin-bottom: 10px;" onclick="closePremiumScreen()">
+          <i class="fa-solid fa-chevron-left"></i>
+        </div>
+
+        <div class="premium-hero"><i class="fa-solid fa-gem"></i></div>
+
+        <div class="premium-title-block">
+          <h1>Unlock Everything</h1>
+          <p>Get unlimited access to all wallpapers and exclusive premium features</p>
+        </div>
+
+        <div class="premium-features-row">
+          <div class="premium-feature-card">
+            <div class="premium-feature-icon"><i class="fa-solid fa-gem"></i><div class="lock-icon"><i class="fa-solid fa-lock"></i></div></div>
+            <p>Premium Wallpaper</p>
+          </div>
+          <div class="premium-feature-card">
+            <div class="premium-feature-icon"><i class="fa-solid fa-palette"></i><div class="lock-icon"><i class="fa-solid fa-lock"></i></div></div>
+            <p>Full Editing</p>
+          </div>
+          <div class="premium-feature-card">
+            <div class="premium-feature-icon"><i class="fa-solid fa-folder-open"></i><div class="lock-icon"><i class="fa-solid fa-lock"></i></div></div>
+            <p>All Collection</p>
+          </div>
+        </div>
+
+        <div class="section-title">Choose a Premium plan</div>
+
+        <div class="plan-option selected" data-plan="lifetime" data-amount="79912" onclick="selectPlan(this)">
+          <div class="plan-badge">Best value</div>
+          <div class="plan-radio"><i class="fa-solid fa-check"></i></div>
           <div class="plan-option-text">
-            <h4>Basic Plan</h4>
-            <p>One visit every 7 days</p>
-            <ul class="plan-feature-list">
-              <li><i class="fa-solid fa-check"></i> Weekly plant visit</li>
-              <li><i class="fa-solid fa-check"></i> General upkeep</li>
-            </ul>
+            <h4>Lifetime</h4>
+            <p>Pay once, own forever</p>
+          </div>
+          <div class="plan-price-block">
+            <div class="plan-strike">₹1,499.00</div>
+            <div class="plan-price">₹799.12</div>
+            <div class="plan-save">Save 46%</div>
           </div>
         </div>
-        <div class="plan-option" id="plan-premium" onclick="selectPlan('premium')">
-          <div class="plan-radio"><i class="fa-solid fa-check" style="display:none;"></i></div>
-          <div class="plan-option-text">
-            <h4>Premium Plan</h4>
-            <p>Complete weekly maintenance</p>
-            <ul class="plan-feature-list">
-              <li><i class="fa-solid fa-check"></i> Plant health check</li>
-              <li><i class="fa-solid fa-check"></i> Pest inspection</li>
-              <li><i class="fa-solid fa-check"></i> Watering inspection</li>
-              <li><i class="fa-solid fa-check"></i> Fertilizer guidance</li>
-              <li><i class="fa-solid fa-check"></i> Cleaning</li>
-              <li><i class="fa-solid fa-check"></i> Small issue fixing</li>
-            </ul>
+
+        <button class="premium-continue-btn" onclick="startPremiumUpgrade()">Continue</button>
+      </div>
+
+      <!-- ========================= -->
+      <!-- PROFILE SCREEN (Replaced Settings) -->
+      <!-- ========================= -->
+
+      <div id="screen-settings" class="screen-content">
+        <div class="page-header"><h1>Profile</h1></div>
+
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh; gap: 20px;">
+          <div style="width: 80px; height: 80px; border-radius: 50%; background: #e0e0e0; display: flex; align-items: center; justify-content: center; font-size: 32px; color: #555;">
+            <i class="fa-solid fa-user"></i>
           </div>
-        </div>
-        <button class="subscribe-btn" onclick="subscribePlan()"><i class="fa-brands fa-whatsapp"></i> Subscribe Now</button>
-
-        <div class="settings-section-label">COMPLETED PROJECTS</div>
-        <div class="gallery-grid" id="gallery-grid"></div>
-
-        <div class="settings-section-label">CUSTOMER REVIEWS</div>
-        <div class="review-scroll" id="more-review-scroll"></div>
-
-        <div class="settings-section-label" id="contact">CONTACT US</div>
-        <div class="contact-row" onclick="contactWhatsApp()">
-          <div class="contact-row-icon"><i class="fa-brands fa-whatsapp"></i></div>
-          <div class="contact-row-text"><h4>WhatsApp</h4><p>+91 93116 49629</p></div>
-        </div>
-        <div class="contact-row" onclick="contactCall()">
-          <div class="contact-row-icon"><i class="fa-solid fa-phone"></i></div>
-          <div class="contact-row-text"><h4>Call Us</h4><p>+91 93116 49629</p></div>
-        </div>
-        <div class="contact-row" onclick="contactEmail()">
-          <div class="contact-row-icon"><i class="fa-solid fa-envelope"></i></div>
-          <div class="contact-row-text"><h4>Email</h4><p>depthnovacustomersupport@gmail.com</p></div>
-        </div>
-        <div class="contact-row" style="cursor:default;">
-          <div class="contact-row-icon"><i class="fa-solid fa-location-dot"></i></div>
-          <div class="contact-row-text"><h4>Address</h4><p>depthnova Gardens Nursery &amp; Landscape Studio, Sector Road, New Delhi, India</p></div>
-        </div>
-        <div class="map-embed-wrap">
-          <iframe src="https://maps.google.com/maps?q=New%20Delhi&t=&z=12&ie=UTF8&iwloc=&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-        </div>
-
-        <div class="site-footer">
-          <div class="footer-cols">
-            <div class="footer-col">
-              <h5>COMPANY</h5>
-              <a onclick="openPolicySheet('about')">About Us</a>
-              <a onclick="scrollMoreTo('services')">Services</a>
-              <a onclick="switchTab('shop', document.getElementById('nav-shop'))">Shop</a>
-              <a onclick="scrollMoreTo('contact')">Contact</a>
-            </div>
-            <div class="footer-col">
-              <h5>LEGAL</h5>
-              <a onclick="openPolicySheet('privacy')">Privacy Policy</a>
-              <a onclick="openPolicySheet('terms')">Terms &amp; Conditions</a>
-            </div>
-          </div>
-          <div class="footer-social">
-            <a onclick="contactWhatsApp()"><i class="fa-brands fa-whatsapp"></i></a>
-            <a onclick="contactCall()"><i class="fa-solid fa-phone"></i></a>
-            <a onclick="contactEmail()"><i class="fa-solid fa-envelope"></i></a>
-          </div>
-          <div class="footer-bottom">© 2026 depthnova Gardens. All rights reserved.</div>
+          <button onclick="showToast('Login clicked')" style="padding: 12px 32px; border-radius: 12px; background: #6366f1; color: white; border: none; font-weight: 600; font-size: 16px; cursor: pointer;">
+            Login
+          </button>
         </div>
       </div>
 
@@ -247,162 +331,67 @@
       <!-- ========================= -->
 
       <nav class="bottom-nav">
-        <div class="nav-item active" id="nav-home" onclick="switchTab('home', this)">
-          <div class="nav-icon-wrapper"><i class="fa-solid fa-house"></i></div>
-          <span>Home</span>
+        <div class="nav-item" id="nav-categories" onclick="switchTab('categories', this)">
+          <div class="nav-icon-wrapper"><i class="fa-solid fa-layer-group"></i></div>
+          <span>Categories</span>
         </div>
-        <div class="nav-item" id="nav-shop" onclick="switchTab('shop', this)">
-          <div class="nav-icon-wrapper"><i class="fa-solid fa-seedling"></i></div>
-          <span>Shop</span>
+        <div class="nav-item active" id="nav-explore" onclick="switchTab('explore', this)">
+          <div class="nav-icon-wrapper"><i class="fa-solid fa-compass"></i></div>
+          <span>Explore</span>
         </div>
-        <div class="nav-item" id="nav-cart" onclick="switchTab('cart', this)">
+        <div class="nav-item" id="nav-request" onclick="switchTab('request', this)">
           <div class="nav-icon-wrapper"><i class="fa-solid fa-cart-shopping"></i></div>
           <span>Cart</span>
         </div>
-        <div class="nav-item" id="nav-more" onclick="switchTab('more', this)">
-          <div class="nav-icon-wrapper"><i class="fa-solid fa-bars"></i></div>
-          <span>More</span>
+        <div class="nav-item" id="nav-settings" onclick="switchTab('settings', this)">
+          <div class="nav-icon-wrapper"><i class="fa-solid fa-user"></i></div>
+          <span>Profile</span>
         </div>
       </nav>
 
-      <!-- Floating WhatsApp Button -->
-      <div class="fab-whatsapp" onclick="contactWhatsApp()">
-        <i class="fa-brands fa-whatsapp"></i>
+      <!-- Wallpaper Preview Modal -->
+      <div id="wallpaper-modal" class="wallpaper-modal">
+        <div id="modal-preview-bg" class="modal-preview-bg"></div>
+        <h2 id="modal-wallpaper-title"></h2>
+        <div class="modal-fav-btn" id="modal-fav-btn" onclick="toggleFavoriteModal()"><i class="fa-solid fa-heart"></i></div>
+        <button id="modal-download-action">Download</button>
+        <button id="modal-set-action">Set Wallpaper</button>
       </div>
 
-      <!-- ========================= -->
-      <!-- Product Detail Modal -->
-      <!-- ========================= -->
-      <div id="product-modal" class="product-modal">
-        <div id="modal-preview-bg" class="modal-preview-bg">
-          <div class="modal-fav-btn" id="modal-fav-btn" onclick="toggleFavoriteModal()"><i class="fa-solid fa-heart"></i></div>
-        </div>
-        <div class="product-modal-sheet">
-          <div class="pm-title-row">
-            <h2 id="modal-product-title"></h2>
-          </div>
-          <span class="pm-cat-tag" id="modal-product-cat"></span>
-          <div class="product-rating" id="modal-product-rating"></div>
-          <div class="pm-price-row">
-            <span class="pm-price" id="modal-product-price"></span>
-            <span class="product-mrp" id="modal-product-mrp"></span>
-            <span class="product-off" id="modal-product-off"></span>
-          </div>
-          <p class="pm-desc" id="modal-product-desc"></p>
-          <div class="pm-qty-row">
-            <span>Quantity</span>
-            <div class="pm-qty-controls">
-              <button class="pm-qty-btn" onclick="changeModalQty(-1)">−</button>
-              <span id="modal-product-qty">1</span>
-              <button class="pm-qty-btn" onclick="changeModalQty(1)">+</button>
+      <!-- Unlock choice sheet -->
+      <div id="unlock-sheet-overlay" class="unlock-sheet-overlay">
+        <div class="unlock-sheet">
+          <div class="unlock-sheet-close" onclick="closeUnlockSheet()"><i class="fa-solid fa-xmark"></i></div>
+          <div class="unlock-sheet-icon"><i class="fa-solid fa-gem"></i></div>
+          <h2>Premium Wallpaper</h2>
+          <p>Choose how to unlock this wallpaper:</p>
+
+          <button class="unlock-option" onclick="chooseUnlockPremium()">
+            <div class="unlock-option-icon"><i class="fa-solid fa-gem"></i></div>
+            <div class="unlock-option-text">
+              <h4>Buy Premium</h4>
+              <p>Subscribe or buy this collection</p>
             </div>
-          </div>
-          <div class="pm-btn-row">
-            <button class="product-btn-cart" style="padding:14px;" onclick="addModalToCart()"><i class="fa-solid fa-cart-plus"></i> Add to Cart</button>
-            <button class="product-btn-buy" style="padding:14px;" onclick="buyModalNow()">Buy Now</button>
-          </div>
-        </div>
-      </div>
+          </button>
 
-      <!-- ========================= -->
-      <!-- Wishlist Sheet -->
-      <!-- ========================= -->
-      <div id="wishlist-sheet-overlay" class="sheet-overlay">
-        <div class="sheet-panel">
-          <div class="sheet-panel-header">
-            <h2>My Wishlist</h2>
-            <div class="sheet-close-btn" onclick="closeSheet('wishlist-sheet-overlay')"><i class="fa-solid fa-xmark"></i></div>
-          </div>
-          <div class="product-grid" id="wishlist-grid"></div>
-          <div id="wishlist-empty-state" class="empty-state" style="display:none;">
-            <i class="fa-solid fa-heart"></i>
-            <p>No plants in your wishlist yet.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- ========================= -->
-      <!-- Checkout Sheet -->
-      <!-- ========================= -->
-      <div id="checkout-sheet-overlay" class="sheet-overlay">
-        <div class="sheet-panel">
-          <div class="sheet-panel-header">
-            <h2>Checkout</h2>
-            <div class="sheet-close-btn" onclick="closeSheet('checkout-sheet-overlay')"><i class="fa-solid fa-xmark"></i></div>
-          </div>
-          <div class="form-field"><label>Full Name *</label><input type="text" id="co-name" placeholder="Your full name" /></div>
-          <div class="form-field"><label>Mobile Number *</label><input type="tel" id="co-mobile" placeholder="10-digit mobile number" /></div>
-          <div class="form-field"><label>Email</label><input type="email" id="co-email" placeholder="you@example.com" /></div>
-          <div class="form-field"><label>Full Address *</label><textarea id="co-address" rows="2" placeholder="House no, street, area"></textarea></div>
-          <div class="form-row-2">
-            <div class="form-field"><label>State *</label><input type="text" id="co-state" placeholder="State" /></div>
-            <div class="form-field"><label>City *</label><input type="text" id="co-city" placeholder="City" /></div>
-          </div>
-          <div class="form-row-2">
-            <div class="form-field"><label>Pincode *</label><input type="text" id="co-pincode" placeholder="Pincode" /></div>
-            <div class="form-field"><label>Landmark</label><input type="text" id="co-landmark" placeholder="Nearby landmark" /></div>
-          </div>
-          <button class="form-submit-btn" onclick="placeOrder()"><i class="fa-brands fa-whatsapp"></i> Place Order via WhatsApp (COD)</button>
-          <button class="form-submit-btn" style="background:var(--primary-color, #1a6cf0);margin-top:10px;" onclick="payOnlineRazorpay()"><i class="fa-solid fa-credit-card"></i> Pay Online Now (Razorpay)</button>
-          <p style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:12px;line-height:1.5;">Choose WhatsApp to confirm your Cash-on-Delivery order, or pay online instantly with Razorpay — either way your order is sent to us for confirmation.</p>
-        </div>
-      </div>
-
-      <!-- ========================= -->
-      <!-- Instant Quote Sheet -->
-      <!-- ========================= -->
-      <div id="quote-sheet-overlay" class="sheet-overlay">
-        <div class="sheet-panel">
-          <div class="sheet-panel-header">
-            <h2>Get Instant Quote</h2>
-            <div class="sheet-close-btn" onclick="closeSheet('quote-sheet-overlay')"><i class="fa-solid fa-xmark"></i></div>
-          </div>
-          <div class="form-field"><label>Name *</label><input type="text" id="q-name" placeholder="Your full name" /></div>
-          <div class="form-field"><label>Mobile Number *</label><input type="tel" id="q-mobile" placeholder="10-digit mobile number" /></div>
-          <div class="form-field"><label>City *</label><input type="text" id="q-city" placeholder="Your city" /></div>
-          <div class="form-field">
-            <label>Project Type *</label>
-            <select id="q-project-type">
-              <option value="">Select project type</option>
-              <option>Farm House Decoration</option>
-              <option>Garden Design</option>
-              <option>Landscaping</option>
-              <option>Lawn Development</option>
-              <option>Vertical Garden</option>
-              <option>Water Fountain</option>
-              <option>Artificial Grass</option>
-              <option>Irrigation System</option>
-              <option>Plant Installation</option>
-              <option>Other</option>
-            </select>
-          </div>
-          <div class="form-row-2">
-            <div class="form-field"><label>Area Size *</label><input type="text" id="q-area" placeholder="e.g. 1500 sq.ft" /></div>
-            <div class="form-field"><label>Budget</label><input type="text" id="q-budget" placeholder="e.g. ₹50,000" /></div>
-          </div>
-          <div class="form-field">
-            <label>Upload Site Image</label>
-            <div class="order-upload-box" id="q-upload-box" onclick="document.getElementById('q-upload-input').click()">
-              <input type="file" id="q-upload-input" accept="image/*" style="display:none;" onchange="handleQuoteImageUpload(event)" />
-              <div class="order-upload-icon"><i class="fa-solid fa-camera"></i></div>
-              <h4>Tap to Upload Photo</h4>
-              <p>A photo of your space helps us quote accurately</p>
+          <button class="unlock-option" id="unlock-ad-btn" onclick="chooseUnlockAd()">
+            <div class="unlock-option-icon ad"><i class="fa-solid fa-play"></i></div>
+            <div class="unlock-option-text">
+              <h4>Watch ad to unlock free</h4>
+              <p id="unlock-ad-desc">Free — used 0 / 1 today</p>
             </div>
-          </div>
-          <div class="form-field"><label>Additional Notes</label><textarea id="q-notes" rows="3" placeholder="Tell us more about your project..."></textarea></div>
-          <button class="form-submit-btn" onclick="submitQuote()"><i class="fa-brands fa-whatsapp"></i> Submit &amp; Send on WhatsApp</button>
+          </button>
+
+          <button class="unlock-maybe-later" onclick="closeUnlockSheet()">Maybe later</button>
         </div>
       </div>
 
-      <!-- ========================= -->
-      <!-- Policy Sheet (About / Privacy / Terms) -->
-      <!-- ========================= -->
-            <div id="policy-sheet-overlay" class="policy-sheet-overlay">
-        <div class="policy-sheet-header">
-          <div class="back-btn" onclick="closePolicySheet()"><i class="fa-solid fa-chevron-left"></i></div>
-          <h2 id="policy-sheet-title">About Us</h2>
-        </div>
-        <div class="policy-sheet-body" id="policy-sheet-body"></div>
+      <!-- Simulated rewarded-ad overlay -->
+      <div id="ad-overlay" class="ad-overlay">
+        <div class="ad-overlay-icon"></div>
+        <h3>Playing rewarded ad…</h3>
+        <p>Your wallpaper unlocks when the ad finishes</p>
+        <div class="ad-overlay-timer" id="ad-overlay-timer">5</div>
       </div>
 
       <!-- Toast -->
@@ -411,7 +400,6 @@
 
     <!-- Razorpay Checkout SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
     <script src="script.js"></script>
   </body>
 </html>
