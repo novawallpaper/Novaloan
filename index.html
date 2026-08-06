@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>depthnova Gardens — Farm House, Garden Decor &amp; Plant Nursery</title>
+    <meta name="description" content="depthnova Gardens — Farm House &amp; Garden Decoration, Landscaping, Plant Nursery and Online Plant Store." />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div class="app-container">
+
+      <!-- ========================= -->
+      <!-- HOME SCREEN -->
+      <!-- ========================= -->
+
+      <div id="screen-home" class="screen-content active">
+        <div class="top-appbar">
+          <div class="brand-mark">
+            <div class="brand-icon">DN</div>
+            <div class="brand-text">
+              <h1>depthnova Gardens</h1>
+              <p>Grow Beautiful. Live Green.</p>
+            </div>
+          </div>
+          <div class="appbar-icons">
+            <div class="appbar-icon-btn" id="wishlist-icon-btn" onclick="openWishlistSheet()">
+              <i class="fa-solid fa-heart"></i>
+            </div>
+            <div class="appbar-icon-btn" onclick="switchTab('cart', document.getElementById('nav-cart'))">
+              <i class="fa-solid fa-cart-shopping"></i>
+              <span class="appbar-badge" id="cart-badge-home">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-card" style="background-image:url('https://picsum.photos/seed/farmhouse-hero/900/1200')">
+          <span class="hero-eyebrow"><i class="fa-solid fa-seedling"></i> Farm House &amp; Garden Specialists</span>
+          <div class="hero-content">
+            <h1>Design Your Dream Farm House &amp; Garden</h1>
+            <p>Premium landscaping, garden decoration and plant nursery — all under one roof. From concept to full bloom.</p>
+            <div class="hero-btn-row">
+              <button class="hero-btn-primary" onclick="openQuoteSheet()"><i class="fa-solid fa-bolt"></i> Get Instant Quote</button>
+              <button class="hero-btn-secondary" onclick="switchTab('shop', document.getElementById('nav-shop'))">Shop Plants</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-head-row">
+          <h2>Explore</h2>
+        </div>
+        <div class="home-cat-scroll">
+          <div class="home-cat-card" style="background-image:url('https://picsum.photos/seed/farmhousedecor/500/700')" onclick="openHomeCategoryInfo('Farm House Decoration')">
+            <span>Farm House Decoration</span>
+          </div>
+          <div class="home-cat-card" style="background-image:url('https://picsum.photos/seed/gardendecor/500/700')" onclick="openHomeCategoryInfo('Garden Decoration')">
+            <span>Garden Decoration</span>
+          </div>
+          <div class="home-cat-card" style="background-image:url('https://picsum.photos/seed/landscaping1/500/700')" onclick="openHomeCategoryInfo('Landscaping')">
+            <span>Landscaping</span>
+          </div>
+          <div class="home-cat-card" style="background-image:url('https://picsum.photos/seed/plantnursery1/500/700')" onclick="switchTab('shop', document.getElementById('nav-shop'))">
+            <span>Plant Nursery</span>
+          </div>
+        </div>
+
+        <div class="custom-card cta-green">
+          <div class="custom-card-header">
+            <div class="sparkle-icon"><i class="fa-solid fa-leaf"></i></div>
+          </div>
+          <h2>Free Site Visit &amp; Design Consultation</h2>
+          <p>Tell us about your space and get a personalised quote on WhatsApp within minutes.</p>
+          <button class="cta-quote-btn" onclick="openQuoteSheet()"><i class="fa-brands fa-whatsapp"></i> Get Instant Quote</button>
+        </div>
+
+        <div class="section-head-row">
+          <h2>Popular Plants</h2>
+          <span class="view-all-link" onclick="switchTab('shop', document.getElementById('nav-shop'))">View All</span>
+        </div>
+        <div class="product-grid" id="home-popular-grid"></div>
+
+        <div class="section-head-row">
+          <h2>Our Services</h2>
+          <span class="view-all-link" onclick="switchTab('more', document.getElementById('nav-more'))">View All</span>
+        </div>
+        <div class="services-grid" id="home-services-grid"></div>
+
+        <div class="section-head-row">
+          <h2>Customer Reviews</h2>
+        </div>
+        <div class="review-scroll" id="home-review-scroll"></div>
+      </div>
+
+      <!-- ========================= -->
+      <!-- SHOP SCREEN -->
+      <!-- ========================= -->
+
+      <div id="screen-shop" class="screen-content">
+        <div class="explore-header">
+          <h1>Plant Shop</h1>
+          <div class="search-box">
+            <input type="text" id="search-input" placeholder="Search plants, pots, tools..." />
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </div>
+        </div>
+
+        <div class="shop-cat-bar" id="shop-cat-bar"></div>
+
+        <div class="product-grid" id="shop-product-grid"></div>
+      </div>
+
+      <!-- ========================= -->
+      <!-- CART SCREEN -->
+      <!-- ========================= -->
+
+      <div id="screen-cart" class="screen-content">
+        <div class="page-header">
+          <h1>My Cart</h1>
+        </div>
+
+        <div id="cart-items-list"></div>
+
+        <div id="cart-empty-state" class="empty-state" style="display:none;">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <p>Your cart is empty. Add some plants to get started!</p>
+        </div>
+
+        <div class="cart-summary-card" id="cart-summary-card" style="display:none;">
+          <div class="cart-summary-row"><span>Subtotal</span><span id="cart-subtotal">₹0</span></div>
+          <div class="cart-summary-row"><span>Delivery Charge</span><span id="cart-delivery">₹0</span></div>
+          <div class="cart-summary-row total"><span>Grand Total</span><span id="cart-grand-total">₹0</span></div>
+          <button class="checkout-btn" onclick="openCheckoutSheet()"><i class="fa-solid fa-lock"></i> Proceed to Checkout</button>
+        </div>
+      </div>
+
+      <!-- ========================= -->
+      <!-- MORE SCREEN (Services / Subscription / Gallery / Reviews / Contact / Footer) -->
+      <!-- ========================= -->
+
+      <div id="screen-more" class="screen-content">
+        <div class="page-header">
+          <h1>More</h1>
+        </div>
+
+        <div class="settings-section-label" id="services">OUR SERVICES</div>
+        <div class="services-grid" id="more-services-grid"></div>
+
+        <div class="settings-section-label">PLANT CARE SUBSCRIPTION</div>
+        <div class="plan-option" id="plan-basic" onclick="selectPlan('basic')">
+          <div class="plan-badge">POPULAR</div>
+          <div class="plan-radio"><i class="fa-solid fa-check" style="display:none;"></i></div>
+          <div class="plan-option-text">
+            <h4>Basic Plan</h4>
+            <p>One visit every 7 days</p>
+            <ul class="plan-feature-list">
+              <li><i class="fa-solid fa-check"></i> Weekly plant visit</li>
+              <li><i class="fa-solid fa-check"></i> General upkeep</li>
+            </ul>
+          </div>
+        </div>
+        <div class="plan-option" id="plan-premium" onclick="selectPlan('premium')">
+          <div class="plan-radio"><i class="fa-solid fa-check" style="display:none;"></i></div>
+          <div class="plan-option-text">
+            <h4>Premium Plan</h4>
+            <p>Complete weekly maintenance</p>
+            <ul class="plan-feature-list">
+              <li><i class="fa-solid fa-check"></i> Plant health check</li>
+              <li><i class="fa-solid fa-check"></i> Pest inspection</li>
+              <li><i class="fa-solid fa-check"></i> Watering inspection</li>
+              <li><i class="fa-solid fa-check"></i> Fertilizer guidance</li>
+              <li><i class="fa-solid fa-check"></i> Cleaning</li>
+              <li><i class="fa-solid fa-check"></i> Small issue fixing</li>
+            </ul>
+          </div>
+        </div>
+        <button class="subscribe-btn" onclick="subscribePlan()"><i class="fa-brands fa-whatsapp"></i> Subscribe Now</button>
+
+        <div class="settings-section-label">COMPLETED PROJECTS</div>
+        <div class="gallery-grid" id="gallery-grid"></div>
+
+        <div class="settings-section-label">CUSTOMER REVIEWS</div>
+        <div class="review-scroll" id="more-review-scroll"></div>
+
+        <div class="settings-section-label" id="contact">CONTACT US</div>
+        <div class="contact-row" onclick="contactWhatsApp()">
+          <div class="contact-row-icon"><i class="fa-brands fa-whatsapp"></i></div>
+          <div class="contact-row-text"><h4>WhatsApp</h4><p>+91 93116 49629</p></div>
+        </div>
+        <div class="contact-row" onclick="contactCall()">
+          <div class="contact-row-icon"><i class="fa-solid fa-phone"></i></div>
+          <div class="contact-row-text"><h4>Call Us</h4><p>+91 93116 49629</p></div>
+        </div>
+        <div class="contact-row" onclick="contactEmail()">
+          <div class="contact-row-icon"><i class="fa-solid fa-envelope"></i></div>
+          <div class="contact-row-text"><h4>Email</h4><p>depthnovacustomersupport@gmail.com</p></div>
+        </div>
+        <div class="contact-row" style="cursor:default;">
+          <div class="contact-row-icon"><i class="fa-solid fa-location-dot"></i></div>
+          <div class="contact-row-text"><h4>Address</h4><p>depthnova Gardens Nursery &amp; Landscape Studio, Sector Road, New Delhi, India</p></div>
+        </div>
+        <div class="map-embed-wrap">
+          <iframe src="https://maps.google.com/maps?q=New%20Delhi&t=&z=12&ie=UTF8&iwloc=&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+
+        <div class="site-footer">
+          <div class="footer-cols">
+            <div class="footer-col">
+              <h5>COMPANY</h5>
+              <a onclick="openPolicySheet('about')">About Us</a>
+              <a onclick="scrollMoreTo('services')">Services</a>
+              <a onclick="switchTab('shop', document.getElementById('nav-shop'))">Shop</a>
+              <a onclick="scrollMoreTo('contact')">Contact</a>
+            </div>
+            <div class="footer-col">
+              <h5>LEGAL</h5>
+              <a onclick="openPolicySheet('privacy')">Privacy Policy</a>
+              <a onclick="openPolicySheet('terms')">Terms &amp; Conditions</a>
+            </div>
+          </div>
+          <div class="footer-social">
+            <a onclick="contactWhatsApp()"><i class="fa-brands fa-whatsapp"></i></a>
+            <a onclick="contactCall()"><i class="fa-solid fa-phone"></i></a>
+            <a onclick="contactEmail()"><i class="fa-solid fa-envelope"></i></a>
+          </div>
+          <div class="footer-bottom">© 2026 depthnova Gardens. All rights reserved.</div>
+        </div>
+      </div>
+
+      <!-- ========================= -->
+      <!-- Bottom Navigation -->
+      <!-- ========================= -->
+
+      <nav class="bottom-nav">
+        <div class="nav-item active" id="nav-home" onclick="switchTab('home', this)">
+          <div class="nav-icon-wrapper"><i class="fa-solid fa-house"></i></div>
+          <span>Home</span>
+        </div>
+        <div class="nav-item" id="nav-shop" onclick="switchTab('shop', this)">
+          <div class="nav-icon-wrapper"><i class="fa-solid fa-seedling"></i></div>
+          <span>Shop</span>
+        </div>
+        <div class="nav-item" id="nav-cart" onclick="switchTab('cart', this)">
+          <div class="nav-icon-wrapper"><i class="fa-solid fa-cart-shopping"></i></div>
+          <span>Cart</span>
+        </div>
+        <div class="nav-item" id="nav-more" onclick="switchTab('more', this)">
+          <div class="nav-icon-wrapper"><i class="fa-solid fa-bars"></i></div>
+          <span>More</span>
+        </div>
+      </nav>
+
+      <!-- Floating WhatsApp Button -->
+      <div class="fab-whatsapp" onclick="contactWhatsApp()">
+        <i class="fa-brands fa-whatsapp"></i>
+      </div>
+
+      <!-- ========================= -->
+      <!-- Product Detail Modal -->
+      <!-- ========================= -->
+      <div id="product-modal" class="product-modal">
+        <div id="modal-preview-bg" class="modal-preview-bg">
+          <div class="modal-fav-btn" id="modal-fav-btn" onclick="toggleFavoriteModal()"><i class="fa-solid fa-heart"></i></div>
+        </div>
+        <div class="product-modal-sheet">
+          <div class="pm-title-row">
+            <h2 id="modal-product-title"></h2>
+          </div>
+          <span class="pm-cat-tag" id="modal-product-cat"></span>
+          <div class="product-rating" id="modal-product-rating"></div>
+          <div class="pm-price-row">
+            <span class="pm-price" id="modal-product-price"></span>
+            <span class="product-mrp" id="modal-product-mrp"></span>
+            <span class="product-off" id="modal-product-off"></span>
+          </div>
+          <p class="pm-desc" id="modal-product-desc"></p>
+          <div class="pm-qty-row">
+            <span>Quantity</span>
+            <div class="pm-qty-controls">
+              <button class="pm-qty-btn" onclick="changeModalQty(-1)">−</button>
+              <span id="modal-product-qty">1</span>
+              <button class="pm-qty-btn" onclick="changeModalQty(1)">+</button>
+            </div>
+          </div>
+          <div class="pm-btn-row">
+            <button class="product-btn-cart" style="padding:14px;" onclick="addModalToCart()"><i class="fa-solid fa-cart-plus"></i> Add to Cart</button>
+            <button class="product-btn-buy" style="padding:14px;" onclick="buyModalNow()">Buy Now</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================= -->
+      <!-- Wishlist Sheet -->
+      <!-- ========================= -->
+      <div id="wishlist-sheet-overlay" class="sheet-overlay">
+        <div class="sheet-panel">
+          <div class="sheet-panel-header">
+            <h2>My Wishlist</h2>
+            <div class="sheet-close-btn" onclick="closeSheet('wishlist-sheet-overlay')"><i class="fa-solid fa-xmark"></i></div>
+          </div>
+          <div class="product-grid" id="wishlist-grid"></div>
+          <div id="wishlist-empty-state" class="empty-state" style="display:none;">
+            <i class="fa-solid fa-heart"></i>
+            <p>No plants in your wishlist yet.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================= -->
+      <!-- Checkout Sheet -->
+      <!-- ========================= -->
+      <div id="checkout-sheet-overlay" class="sheet-overlay">
+        <div class="sheet-panel">
+          <div class="sheet-panel-header">
+            <h2>Checkout</h2>
+            <div class="sheet-close-btn" onclick="closeSheet('checkout-sheet-overlay')"><i class="fa-solid fa-xmark"></i></div>
+          </div>
+          <div class="form-field"><label>Full Name *</label><input type="text" id="co-name" placeholder="Your full name" /></div>
+          <div class="form-field"><label>Mobile Number *</label><input type="tel" id="co-mobile" placeholder="10-digit mobile number" /></div>
+          <div class="form-field"><label>Email</label><input type="email" id="co-email" placeholder="you@example.com" /></div>
+          <div class="form-field"><label>Full Address *</label><textarea id="co-address" rows="2" placeholder="House no, street, area"></textarea></div>
+          <div class="form-row-2">
+            <div class="form-field"><label>State *</label><input type="text" id="co-state" placeholder="State" /></div>
+            <div class="form-field"><label>City *</label><input type="text" id="co-city" placeholder="City" /></div>
+          </div>
+          <div class="form-row-2">
+            <div class="form-field"><label>Pincode *</label><input type="text" id="co-pincode" placeholder="Pincode" /></div>
+            <div class="form-field"><label>Landmark</label><input type="text" id="co-landmark" placeholder="Nearby landmark" /></div>
+          </div>
+          <button class="form-submit-btn" onclick="placeOrder()"><i class="fa-brands fa-whatsapp"></i> Place Order via WhatsApp (COD)</button>
+          <button class="form-submit-btn" style="background:var(--primary-color, #1a6cf0);margin-top:10px;" onclick="payOnlineRazorpay()"><i class="fa-solid fa-credit-card"></i> Pay Online Now (Razorpay)</button>
+          <p style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:12px;line-height:1.5;">Choose WhatsApp to confirm your Cash-on-Delivery order, or pay online instantly with Razorpay — either way your order is sent to us for confirmation.</p>
+        </div>
+      </div>
+
+      <!-- ========================= -->
+      <!-- Instant Quote Sheet -->
+      <!-- ========================= -->
+      <div id="quote-sheet-overlay" class="sheet-overlay">
+        <div class="sheet-panel">
+          <div class="sheet-panel-header">
+            <h2>Get Instant Quote</h2>
+            <div class="sheet-close-btn" onclick="closeSheet('quote-sheet-overlay')"><i class="fa-solid fa-xmark"></i></div>
+          </div>
+          <div class="form-field"><label>Name *</label><input type="text" id="q-name" placeholder="Your full name" /></div>
+          <div class="form-field"><label>Mobile Number *</label><input type="tel" id="q-mobile" placeholder="10-digit mobile number" /></div>
+          <div class="form-field"><label>City *</label><input type="text" id="q-city" placeholder="Your city" /></div>
+          <div class="form-field">
+            <label>Project Type *</label>
+            <select id="q-project-type">
+              <option value="">Select project type</option>
+              <option>Farm House Decoration</option>
+              <option>Garden Design</option>
+              <option>Landscaping</option>
+              <option>Lawn Development</option>
+              <option>Vertical Garden</option>
+              <option>Water Fountain</option>
+              <option>Artificial Grass</option>
+              <option>Irrigation System</option>
+              <option>Plant Installation</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-row-2">
+            <div class="form-field"><label>Area Size *</label><input type="text" id="q-area" placeholder="e.g. 1500 sq.ft" /></div>
+            <div class="form-field"><label>Budget</label><input type="text" id="q-budget" placeholder="e.g. ₹50,000" /></div>
+          </div>
+          <div class="form-field">
+            <label>Upload Site Image</label>
+            <div class="order-upload-box" id="q-upload-box" onclick="document.getElementById('q-upload-input').click()">
+              <input type="file" id="q-upload-input" accept="image/*" style="display:none;" onchange="handleQuoteImageUpload(event)" />
+              <div class="order-upload-icon"><i class="fa-solid fa-camera"></i></div>
+              <h4>Tap to Upload Photo</h4>
+              <p>A photo of your space helps us quote accurately</p>
+            </div>
+          </div>
+          <div class="form-field"><label>Additional Notes</label><textarea id="q-notes" rows="3" placeholder="Tell us more about your project..."></textarea></div>
+          <button class="form-submit-btn" onclick="submitQuote()"><i class="fa-brands fa-whatsapp"></i> Submit &amp; Send on WhatsApp</button>
+        </div>
+      </div>
+
+      <!-- ========================= -->
+      <!-- Policy Sheet (About / Privacy / Terms) -->
+      <!-- ========================= -->
+      <div id="policy-sheet-overlay" class="policy-sheet-overlay">
+        <div class="policy-sheet-header">
+          <div class="back-btn" onclick="closePolicySheet()"><i class="fa-solid fa-chevron-left"></i></div>
+          <h2 id="policy-sheet-title">About Us</h2>
+        </div>
+        <div class="policy-sheet-body" id="policy-sheet-body"></div>
+      </div>
+
+      <!-- Toast -->
+      <div id="app-toast" class="toast"></div>
+    </div>
+
+    <!-- Razorpay Checkout SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <script src="script.js"></script>
+  </body>
+</html>
