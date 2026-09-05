@@ -1,23 +1,447 @@
 <!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SetuFin — Loans You Can Trust</title>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mitti Manor | Eco-Friendly Disposables & Wholesale Tableware</title>
-  <meta name="description"
-    content="Wholesale sustainable disposables, Terracotta Kulhads, Areca Palm Leaf tableware, and Bagasse containers directly from Mitti Manor." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap"
-    rel="stylesheet">
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-</head>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
 
-<body class="bg-[#FAF7F2] text-[#191919] antialiased selection:bg-[#1C1C1C] selection:text-[#FAF7F2]">
-  <div id="root"></div>
-  <script type="module" src="/src/main.tsx"></script>
-</body>
+    <!-- Google Identity Services (Sign in with Google) -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 
+    <!-- Firebase (compat build — simplest to wire up, swap for modular SDK later if you like) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div class="app-container">
+      <!-- ========================= -->
+      <!-- LOGIN GATE -->
+      <!-- ========================= -->
+      <div id="login-gate" class="login-gate">
+        <div class="login-content">
+          <div class="login-app-icon">SF</div>
+          <h1 class="login-app-name">SetuFin</h1>
+          <p class="login-tagline">Personal, Business, Gold &amp; Property loans — quick, transparent, RBI-registered.</p>
+
+          <div class="login-license-row">
+            <span><i class="fa-solid fa-shield-halved"></i> RBI NBFC Registered</span>
+            <span><i class="fa-solid fa-scale-balanced"></i> Delhi Moneylender Licensed</span>
+          </div>
+
+          <!-- Phone OTP -->
+          <div class="login-panel" id="phone-login-panel">
+            <label class="login-label">Mobile number</label>
+            <div class="phone-input-row">
+              <span class="phone-prefix">+91</span>
+              <input type="tel" id="phone-input" maxlength="10" placeholder="98765 43210" inputmode="numeric" />
+            </div>
+            <button class="login-primary-btn" id="send-otp-btn" onclick="sendOtp()">Send OTP</button>
+
+            <div id="otp-row" class="otp-row hidden">
+              <label class="login-label">Enter OTP</label>
+              <input type="tel" id="otp-input" maxlength="6" placeholder="6-digit code" inputmode="numeric" />
+              <button class="login-primary-btn" id="verify-otp-btn" onclick="verifyOtp()">Verify &amp; Continue</button>
+              <p class="otp-resend" onclick="sendOtp()">Didn't get it? Resend OTP</p>
+            </div>
+
+            <div id="recaptcha-container"></div>
+          </div>
+
+          <div class="login-divider"><span>or</span></div>
+
+          <div id="google-signin-btn-gate" class="login-google-slot"></div>
+          <button id="google-fallback-btn" class="login-google-fallback" style="display: none" onclick="handleFallbackGoogleClick()">
+            <i class="fa-brands fa-google"></i> Sign in with Google
+          </button>
+
+          <p id="signin-status" class="signin-status"></p>
+
+          <p class="login-terms">
+            By continuing, you agree to our
+            <a href="terms.html" target="_blank">Terms of Service</a> and
+            <a href="privacy.html" target="_blank">Privacy Policy</a>.
+            We never ask for your Aadhaar number in the app — only a masked copy for verification.
+          </p>
+
+          <div id="debug-log" class="debug-log"></div>
+        </div>
+      </div>
+
+      <!-- ========================= -->
+      <!-- HOME -->
+      <!-- ========================= -->
+      <div id="screen-home" class="screen-content active">
+        <div class="home-header">
+          <div>
+            <p class="home-greeting" id="home-greeting">Welcome back</p>
+            <h1 class="home-username" id="home-username">Guest</h1>
+          </div>
+          <div class="home-bell"><i class="fa-solid fa-bell"></i></div>
+        </div>
+
+        <div class="hero-card">
+          <p class="hero-eyebrow">Loans up to</p>
+          <h2 class="hero-amount">₹40,00,000</h2>
+          <p class="hero-sub">Personal, Business, Gold &amp; Property — approval in as little as 24 hours.</p>
+          <button class="hero-cta" onclick="switchTab('apply', document.getElementById('nav-apply'))">
+            Apply now <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+
+        <div class="section-title">Choose a loan type</div>
+        <div class="loan-type-grid">
+          <div class="loan-type-card" onclick="startApplyWithType('Personal')">
+            <div class="loan-type-icon"><i class="fa-solid fa-user"></i></div>
+            <h4>Personal Loan</h4>
+            <p>From 11.5% p.a.</p>
+          </div>
+          <div class="loan-type-card" onclick="startApplyWithType('Business')">
+            <div class="loan-type-icon"><i class="fa-solid fa-briefcase"></i></div>
+            <h4>Business Loan</h4>
+            <p>From 13% p.a.</p>
+          </div>
+          <div class="loan-type-card" onclick="startApplyWithType('Gold')">
+            <div class="loan-type-icon"><i class="fa-solid fa-ring"></i></div>
+            <h4>Gold Loan</h4>
+            <p>From 9% p.a.</p>
+          </div>
+          <div class="loan-type-card" onclick="startApplyWithType('Property')">
+            <div class="loan-type-icon"><i class="fa-solid fa-house"></i></div>
+            <h4>Property Loan</h4>
+            <p>From 9.5% p.a.</p>
+          </div>
+        </div>
+
+        <div class="section-title">Why SetuFin</div>
+        <div class="why-row">
+          <div class="why-card">
+            <i class="fa-solid fa-bolt"></i>
+            <p>Fast approval</p>
+          </div>
+          <div class="why-card">
+            <i class="fa-solid fa-lock"></i>
+            <p>Secure &amp; encrypted</p>
+          </div>
+          <div class="why-card">
+            <i class="fa-solid fa-file-shield"></i>
+            <p>No hidden charges</p>
+          </div>
+        </div>
+
+        <div class="trust-strip">
+          <p><strong>RBI NBFC Reg. No.:</strong> <span id="home-nbfc-no">N-14.XXXXX (add yours)</span></p>
+          <p><strong>Delhi Moneylender License No.:</strong> <span id="home-ml-no">DL/MNY/XXXX (add yours)</span></p>
+        </div>
+      </div>
+
+      <!-- ========================= -->
+      <!-- EMI CALCULATOR -->
+      <!-- ========================= -->
+      <div id="screen-calculator" class="screen-content">
+        <div class="page-header"><h1>EMI Calculator</h1></div>
+
+        <div class="calc-card">
+          <div class="calc-row">
+            <div class="calc-row-top">
+              <span>Loan amount</span>
+              <span class="calc-value" id="calc-amount-val">₹5,00,000</span>
+            </div>
+            <input type="range" id="calc-amount" class="editor-range" min="10000" max="4000000" step="10000" value="500000" oninput="updateEmi()" />
+          </div>
+
+          <div class="calc-row">
+            <div class="calc-row-top">
+              <span>Tenure (months)</span>
+              <span class="calc-value" id="calc-tenure-val">36</span>
+            </div>
+            <input type="range" id="calc-tenure" class="editor-range" min="3" max="240" step="1" value="36" oninput="updateEmi()" />
+          </div>
+
+          <div class="calc-row">
+            <div class="calc-row-top">
+              <span>Interest rate (% p.a.)</span>
+              <span class="calc-value" id="calc-rate-val">12.0%</span>
+            </div>
+            <input type="range" id="calc-rate" class="editor-range" min="6" max="30" step="0.1" value="12" oninput="updateEmi()" />
+          </div>
+        </div>
+
+        <div class="calc-result-card">
+          <div class="calc-result-main">
+            <p>Monthly EMI</p>
+            <h2 id="calc-emi-result">₹0</h2>
+          </div>
+          <div class="calc-result-split">
+            <div>
+              <p>Principal</p>
+              <h4 id="calc-principal-result">₹0</h4>
+            </div>
+            <div>
+              <p>Total interest</p>
+              <h4 id="calc-interest-result">₹0</h4>
+            </div>
+            <div>
+              <p>Total payment</p>
+              <h4 id="calc-total-result">₹0</h4>
+            </div>
+          </div>
+        </div>
+
+        <button class="premium-continue-btn" onclick="switchTab('apply', document.getElementById('nav-apply'))">Apply for this amount</button>
+      </div>
+
+      <!-- ========================= -->
+      <!-- APPLY (multi-step) -->
+      <!-- ========================= -->
+      <div id="screen-apply" class="screen-content">
+        <div class="page-header"><h1>Apply for a Loan</h1></div>
+
+        <div class="stepper" id="apply-stepper">
+          <div class="stepper-step active" data-step="1"><span>1</span>Loan</div>
+          <div class="stepper-step" data-step="2"><span>2</span>Personal</div>
+          <div class="stepper-step" data-step="3"><span>3</span>Income</div>
+          <div class="stepper-step" data-step="4"><span>4</span>Documents</div>
+          <div class="stepper-step" data-step="5"><span>5</span>Review</div>
+        </div>
+
+        <!-- Step 1: Loan details -->
+        <div class="apply-step active" id="apply-step-1">
+          <div class="form-label">Loan type</div>
+          <div class="chip-row" id="loan-type-chips">
+            <div class="chip active" data-type="Personal" onclick="selectLoanType(this)">Personal</div>
+            <div class="chip" data-type="Business" onclick="selectLoanType(this)">Business</div>
+            <div class="chip" data-type="Gold" onclick="selectLoanType(this)">Gold</div>
+            <div class="chip" data-type="Property" onclick="selectLoanType(this)">Property</div>
+          </div>
+
+          <div class="form-label">Loan amount needed</div>
+          <input type="number" class="text-input" id="apply-amount" placeholder="e.g. 500000" oninput="syncApplyAmount()" />
+
+          <div class="form-label">Tenure (months)</div>
+          <input type="number" class="text-input" id="apply-tenure" placeholder="e.g. 36" />
+
+          <div class="form-label">Purpose of loan</div>
+          <textarea class="text-input textarea" id="apply-purpose" placeholder="e.g. Medical expense, shop expansion, wedding..."></textarea>
+        </div>
+
+        <!-- Step 2: Personal details -->
+        <div class="apply-step" id="apply-step-2">
+          <div class="form-label">Full name</div>
+          <input type="text" class="text-input" id="p-name" placeholder="As per PAN card" />
+
+          <div class="form-row-2">
+            <div>
+              <div class="form-label">Date of birth</div>
+              <input type="date" class="text-input" id="p-dob" />
+            </div>
+            <div>
+              <div class="form-label">Gender</div>
+              <select class="text-input" id="p-gender">
+                <option value="">Select</option>
+                <option>Male</option>
+                <option>Female</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-label">Mobile number</div>
+          <input type="tel" class="text-input" id="p-phone" maxlength="10" placeholder="10-digit mobile number" />
+
+          <div class="form-label">Email</div>
+          <input type="email" class="text-input" id="p-email" placeholder="you@example.com" />
+
+          <div class="form-label">Full address</div>
+          <textarea class="text-input textarea" id="p-address" placeholder="House no., street, area"></textarea>
+
+          <div class="form-row-2">
+            <div>
+              <div class="form-label">City</div>
+              <input type="text" class="text-input" id="p-city" placeholder="City" />
+            </div>
+            <div>
+              <div class="form-label">Pincode</div>
+              <input type="text" class="text-input" id="p-pincode" maxlength="6" placeholder="110001" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Income / employment -->
+        <div class="apply-step" id="apply-step-3">
+          <div class="form-label">Employment type</div>
+          <select class="text-input" id="p-employment">
+            <option value="">Select</option>
+            <option>Salaried</option>
+            <option>Self-employed</option>
+            <option>Business owner</option>
+          </select>
+
+          <div class="form-label">Company / business name</div>
+          <input type="text" class="text-input" id="p-company" placeholder="Employer or business name" />
+
+          <div class="form-label">Monthly income (₹)</div>
+          <input type="number" class="text-input" id="p-income" placeholder="e.g. 45000" />
+
+          <div class="form-label">PAN number</div>
+          <input type="text" class="text-input" id="p-pan" maxlength="10" placeholder="ABCDE1234F" style="text-transform:uppercase" />
+          <p class="field-hint">We store your PAN for KYC. We never store your Aadhaar number — only a masked copy image.</p>
+        </div>
+
+        <!-- Step 4: Documents -->
+        <div class="apply-step" id="apply-step-4">
+          <div class="upload-row" data-doc="pan">
+            <div class="upload-row-icon"><i class="fa-solid fa-id-card"></i></div>
+            <div class="upload-row-text">
+              <h4>PAN card photo</h4>
+              <p id="status-pan">Not uploaded</p>
+            </div>
+            <label class="upload-btn">Upload<input type="file" accept="image/*" hidden onchange="handleDocUpload(event,'pan')" /></label>
+          </div>
+
+          <div class="upload-row" data-doc="aadhaarMasked">
+            <div class="upload-row-icon"><i class="fa-solid fa-address-card"></i></div>
+            <div class="upload-row-text">
+              <h4>Masked Aadhaar / Address proof</h4>
+              <p id="status-aadhaarMasked">Cover all but the last 4 digits before uploading</p>
+            </div>
+            <label class="upload-btn">Upload<input type="file" accept="image/*" hidden onchange="handleDocUpload(event,'aadhaarMasked')" /></label>
+          </div>
+
+          <div class="upload-row" data-doc="income">
+            <div class="upload-row-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+            <div class="upload-row-text">
+              <h4>Salary slip / income proof</h4>
+              <p id="status-income">Not uploaded</p>
+            </div>
+            <label class="upload-btn">Upload<input type="file" accept="image/*,.pdf" hidden onchange="handleDocUpload(event,'income')" /></label>
+          </div>
+
+          <div class="upload-row" data-doc="bank">
+            <div class="upload-row-icon"><i class="fa-solid fa-building-columns"></i></div>
+            <div class="upload-row-text">
+              <h4>Bank statement (last 3 months)</h4>
+              <p id="status-bank">Not uploaded</p>
+            </div>
+            <label class="upload-btn">Upload<input type="file" accept="image/*,.pdf" hidden onchange="handleDocUpload(event,'bank')" /></label>
+          </div>
+
+          <div class="upload-row" data-doc="selfie">
+            <div class="upload-row-icon"><i class="fa-solid fa-camera"></i></div>
+            <div class="upload-row-text">
+              <h4>Live selfie</h4>
+              <p id="status-selfie">Not uploaded</p>
+            </div>
+            <label class="upload-btn">Upload<input type="file" accept="image/*" capture="user" hidden onchange="handleDocUpload(event,'selfie')" /></label>
+          </div>
+        </div>
+
+        <!-- Step 5: Review -->
+        <div class="apply-step" id="apply-step-5">
+          <div class="review-card" id="review-summary"></div>
+
+          <div class="fee-card">
+            <div>
+              <h4>Application processing fee</h4>
+              <p>One-time, non-refundable, charged only on submission</p>
+            </div>
+            <div class="fee-amount">₹35</div>
+          </div>
+        </div>
+
+        <div class="apply-nav-row">
+          <button class="apply-back-btn" id="apply-back-btn" onclick="applyPrevStep()" style="visibility:hidden;">Back</button>
+          <button class="apply-next-btn" id="apply-next-btn" onclick="applyNextStep()">Continue</button>
+        </div>
+      </div>
+
+      <!-- ========================= -->
+      <!-- MY LOANS -->
+      <!-- ========================= -->
+      <div id="screen-myloans" class="screen-content">
+        <div class="page-header"><h1>My Applications</h1></div>
+        <div id="myloans-list"></div>
+      </div>
+
+      <!-- ========================= -->
+      <!-- PROFILE -->
+      <!-- ========================= -->
+      <div id="screen-profile" class="screen-content">
+        <div class="page-header"><h1>Profile</h1></div>
+
+        <div class="profile-card">
+          <div class="profile-left">
+            <div class="avatar" id="profile-avatar">U</div>
+            <div>
+              <div class="profile-name" id="profile-name-text">Not signed in</div>
+              <div class="profile-email" id="profile-email-text"></div>
+            </div>
+          </div>
+          <i class="fa-solid fa-right-from-bracket logout-btn" onclick="signOutUser()"></i>
+        </div>
+
+        <div class="settings-section-label">COMPANY DETAILS</div>
+        <div class="license-card">
+          <p><strong>Company:</strong> SetuFin Financial Services Pvt. Ltd.</p>
+          <p><strong>RBI NBFC Reg. No.:</strong> N-14.XXXXX</p>
+          <p><strong>Delhi Moneylender License No.:</strong> DL/MNY/XXXX</p>
+          <p><strong>Registered office:</strong> New Delhi, Delhi, India</p>
+        </div>
+
+        <div class="settings-section-label">SUPPORT</div>
+        <div class="settings-row" onclick="window.location.href='mailto:support@setufin.example'">
+          <div class="settings-row-icon"><i class="fa-solid fa-envelope"></i></div>
+          <div class="settings-row-text"><h4>Email support</h4><p>support@setufin.example</p></div>
+          <i class="fa-solid fa-chevron-right settings-row-arrow"></i>
+        </div>
+        <div class="settings-row" onclick="showToast('Grievance officer details coming soon')">
+          <div class="settings-row-icon"><i class="fa-solid fa-gavel"></i></div>
+          <div class="settings-row-text"><h4>Grievance officer</h4><p>Required RBI disclosure</p></div>
+          <i class="fa-solid fa-chevron-right settings-row-arrow"></i>
+        </div>
+      </div>
+
+      <!-- ========================= -->
+      <!-- Bottom Navigation -->
+      <!-- ========================= -->
+      <nav class="bottom-nav">
+        <div class="nav-item active" id="nav-home" onclick="switchTab('home', this)">
+          <div class="nav-icon-wrapper"><i class="fa-solid fa-house"></i></div><span>Home</span>
+        </div>
+        <div class="nav-item" id="nav-calculator" onclick="switchTab('calculator', this)">
+          <div class="nav-icon-wrapper"><i class="fa-solid fa-calculator"></i></div><span>EMI</span>
+        </div>
+        <div class="nav-item" id="nav-apply" onclick="switchTab('apply', this)">
+          <div class="nav-icon-wrapper"><i class="fa-solid fa-file-signature"></i></div><span>Apply</span>
+        </div>
+        <div class="nav-item" id="nav-myloans" onclick="switchTab('myloans', this)">
+          <div class="nav-icon-wrapper"><i class="fa-solid fa-list-check"></i></div><span>My Loans</span>
+        </div>
+        <div class="nav-item" id="nav-profile" onclick="switchTab('profile', this)">
+          <div class="nav-icon-wrapper"><i class="fa-solid fa-user"></i></div><span>Profile</span>
+        </div>
+      </nav>
+
+      <div id="app-toast" class="toast"></div>
+    </div>
+
+    <!-- Razorpay Checkout SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <script src="script.js"></script>
+  </body>
 </html>
