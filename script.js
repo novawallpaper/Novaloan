@@ -1,14 +1,15 @@
 /* =========================================================
-   SetuFin — loan app logic
+   Nova Loan — loan app logic
    ---------------------------------------------------------
-   BEFORE GOING LIVE, replace these placeholders:
-   1. FIREBASE_CONFIG below — get it from your Firebase project settings.
-   2. GOOGLE_CLIENT_ID — from Google Cloud Console (OAuth client).
-   3. RAZORPAY_KEY_ID — your live Razorpay key.
-   4. Home/Profile screens in index.html — put your real NBFC
-      registration number and Delhi Moneylender license number
-      where it currently says "XXXXX" (RBI requires these to be
-      displayed, and it builds borrower trust).
+   STILL TO FILL IN (not code — content in index.html):
+   1. RBI NBFC Registration Number — replace "N-14.XXXXX" in
+      index.html (Home screen trust-strip + Profile screen).
+   2. Delhi Moneylender License Number — replace "DL/MNY/XXXX"
+      in the same two spots.
+   3. Support email — replace "support@setufin.example" in the
+      Profile screen's support row.
+   RBI requires the NBFC/license numbers to be displayed to
+   borrowers, so don't ship without filling those in.
 
    IMPORTANT — DATA WE INTENTIONALLY DO NOT COLLECT:
    We never ask for or store a user's Aadhaar NUMBER anywhere in
@@ -22,15 +23,16 @@
    ========================================================= */
 
 const FIREBASE_CONFIG = {
-  apiKey: "YOUR_FIREBASE_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID",
+  apiKey: "AIzaSyAdSHLW_QhsCgdxOaZHsxW-i_ke076tiGA",
+  authDomain: "nova-chat-d2450.firebaseapp.com",
+  projectId: "nova-chat-d2450",
+  storageBucket: "nova-chat-d2450.firebasestorage.app",
+  messagingSenderId: "470674864622",
+  appId: "1:470674864622:web:1781d47bfb5829e2ba76ff",
+  measurementId: "G-V3L08VM24H",
 };
 
-const GOOGLE_CLIENT_ID = "452456583028-1l86bibq60ggkl3o1h5j88sed7v04eof.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = "470674864622-aqmvbmn0r33nasost2814phsqljgtc3l.apps.googleusercontent.com";
 const RAZORPAY_KEY_ID = "rzp_live_TCZM7OsD80tNpH";
 const PROCESSING_FEE_PAISE = 3500; // ₹35.00
 
@@ -325,7 +327,7 @@ function submitApplication() {
     key: RAZORPAY_KEY_ID,
     amount: PROCESSING_FEE_PAISE,
     currency: "INR",
-    name: "SetuFin — Loan Application",
+    name: "Nova Loan — Loan Application",
     description: `Processing fee — ${state.apply.loanType} loan`,
     prefill: {
       name: state.apply.name || state.user?.name || "",
