@@ -15,7 +15,7 @@
 
 // Google OAuth Client ID
 const GOOGLE_CLIENT_ID =
-  "470674864622-aqmvbmn0r33nasost2814phsqljgtc3l.apps.googleusercontent.com";
+  "452456583028-1l86bibq60ggkl3o1h5j88sed7v04eof.apps.googleusercontent.com";
 
 // Razorpay PUBLIC Key ID
 const RAZORPAY_KEY_ID =
