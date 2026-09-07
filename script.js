@@ -1,187 +1,326 @@
-/* =========================================
-   SETUFIN — SCRIPT.JS
+/* =========================================================
+   REQUEST WEBSITE — Google Login + ₹45 Razorpay
    Flow:
-   Google Login
-        ↓
-   ₹45 Razorpay Payment
-        ↓
-   Your Request Saved
-========================================= */
+   Google Login → Payment Page → ₹45 Payment
+   → Backend Verification → Request Saved
+   ========================================================= */
 
+/* ================= PUBLIC CONFIG ================= */
 
-/* =========================================
-   PUBLIC CONFIG
-========================================= */
-
-// Google OAuth Client ID
 const GOOGLE_CLIENT_ID =
-  "452456583028-1l86bibq60ggkl3o1h5j88sed7v04eof.apps.googleusercontent.com";
+  "470674864622-aqmvbmn0r33nasost2814phsqljgtc3l.apps.googleusercontent.com";
 
-// Razorpay PUBLIC Key ID
 const RAZORPAY_KEY_ID =
   "rzp_live_TCZM7OsD80tNpH";
 
-// Payment amount
 const PAYMENT_AMOUNT = 45;
 
 
-/* =========================================
-   APP STATE
-========================================= */
+/* ================= APP STATE ================= */
 
 let currentUser = null;
 let paymentInProgress = false;
 
 
-/* =========================================
-   PAGE ELEMENTS
-========================================= */
+/* ================= PAGE ELEMENTS ================= */
 
-const loginPage = document.getElementById("loginPage");
-const paymentPage = document.getElementById("paymentPage");
-const successPage = document.getElementById("successPage");
+const loginPage = document.getElementById("login-page");
+const paymentPage = document.getElementById("payment-page");
+const successPage = document.getElementById("success-page");
 
-const payButton = document.getElementById("payButton");
-const payButtonText = document.getElementById("payButtonText");
-
-const loadingOverlay = document.getElementById("loadingOverlay");
-const loadingText = document.getElementById("loadingText");
-
+const loadingOverlay = document.getElementById("loading-overlay");
 const toast = document.getElementById("toast");
-const toastMessage = document.getElementById("toastMessage");
 
 
-/* =========================================
-   INITIALIZE
-========================================= */
+/* ================= PAGE CONTROL ================= */
 
-document.addEventListener("DOMContentLoaded", () => {
-
-  // Make sure login page is visible initially
-  showPage("loginPage");
-
-  // Check Razorpay availability
-  if (typeof Razorpay === "undefined") {
-    console.warn("Razorpay Checkout SDK not loaded.");
-  }
-
-});
-
-
-/* =========================================
-   PAGE SWITCHING
-========================================= */
-
-function showPage(pageId) {
-
-  loginPage.classList.add("hidden");
-  paymentPage.classList.add("hidden");
-  successPage.classList.add("hidden");
-
-  const page = document.getElementById(pageId);
+function showPage(page) {
+  document.querySelectorAll(".page").forEach((el) => {
+    el.classList.remove("active");
+  });
 
   if (page) {
-    page.classList.remove("hidden");
+    page.classList.add("active");
   }
 }
 
 
-/* =========================================
+function showLoginPage() {
+  showPage(loginPage);
+}
+
+
+function showPaymentPage() {
+  showPage(paymentPage);
+}
+
+
+function showSuccessPage() {
+  showPage(successPage);
+}
+
+
+/* ================= LOADING ================= */
+
+function showLoading(text = "Please wait...") {
+  if (!loadingOverlay) return;
+
+  const textElement =
+    loadingOverlay.querySelector(".loading-text");
+
+  if (textElement) {
+    textElement.textContent = text;
+  }
+
+  loadingOverlay.classList.add("active");
+}
+
+
+function hideLoading() {
+  if (!loadingOverlay) return;
+
+  loadingOverlay.classList.remove("active");
+}
+
+
+/* ================= TOAST ================= */
+
+let toastTimer;
+
+function showToast(message) {
+  if (!toast) {
+    alert(message);
+    return;
+  }
+
+  toast.textContent = message;
+  toast.classList.add("show");
+
+  clearTimeout(toastTimer);
+
+  toastTimer = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 3000);
+}
+
+
+/* =========================================================
    GOOGLE LOGIN
-========================================= */
+   ========================================================= */
 
-/*
-   Google Identity Services calls this function
-   after successful Google authentication.
-*/
+function initGoogleLogin() {
 
-function handleGoogleLogin(response) {
-
-  if (!response || !response.credential) {
-    showToast("Google login failed.");
+  if (
+    typeof google === "undefined" ||
+    !google.accounts ||
+    !google.accounts.id
+  ) {
+    console.error("Google Identity Services not loaded.");
+    showToast("Google Login load nahi ho paya.");
     return;
   }
 
   try {
 
-    // Decode Google credential payload
-    const payload = parseJwt(response.credential);
+    google.accounts.id.initialize({
 
-    currentUser = {
-      id: payload.sub || "",
-      name: payload.name || "User",
-      email: payload.email || "",
-      picture: payload.picture || ""
-    };
+      client_id: GOOGLE_CLIENT_ID,
 
+      callback: handleGoogleLogin,
 
-    // Save only basic non-sensitive session information
-    sessionStorage.setItem(
-      "setufin_user",
-      JSON.stringify(currentUser)
-    );
+      auto_select: false,
+
+      cancel_on_tap_outside: true
+
+    });
 
 
-    // Continue to payment
-    showPaymentPage();
+    const buttonContainer =
+      document.getElementById("google-login-button");
+
+    if (buttonContainer) {
+
+      buttonContainer.innerHTML = "";
+
+      google.accounts.id.renderButton(
+        buttonContainer,
+        {
+          theme: "outline",
+          size: "large",
+          shape: "rectangular",
+          width: 320,
+          text: "continue_with"
+        }
+      );
+
+    }
 
   } catch (error) {
 
-    console.error("Google Login Error:", error);
+    console.error("Google initialization error:", error);
 
-    showToast("Unable to complete Google login.");
+    showToast("Google Login setup error.");
 
   }
 }
 
 
-/* =========================================
-   JWT DECODER
-========================================= */
+/* ================= GOOGLE CALLBACK ================= */
 
-function parseJwt(token) {
+function handleGoogleLogin(response) {
 
-  const base64Url = token.split(".")[1];
+  if (!response || !response.credential) {
+
+    showToast("Google Login failed.");
+    return;
+
+  }
+
+  try {
+
+    const user = decodeGoogleJWT(response.credential);
+
+    if (!user || !user.email) {
+      throw new Error("Invalid Google account information.");
+    }
+
+    currentUser = {
+
+      name: user.name || "User",
+
+      email: user.email,
+
+      picture: user.picture || "",
+
+      googleCredential: response.credential
+
+    };
+
+
+    /* Save login for current browser session */
+
+    sessionStorage.setItem(
+      "request_user",
+      JSON.stringify({
+        name: currentUser.name,
+        email: currentUser.email,
+        picture: currentUser.picture
+      })
+    );
+
+
+    updateUserUI();
+
+    showToast(
+      `Welcome, ${currentUser.name.split(" ")[0]}!`
+    );
+
+
+    setTimeout(() => {
+
+      showPaymentPage();
+
+    }, 500);
+
+  } catch (error) {
+
+    console.error("Google login error:", error);
+
+    showToast("Google Login failed. Please try again.");
+
+  }
+
+}
+
+
+/* ================= DECODE GOOGLE JWT ================= */
+
+function decodeGoogleJWT(token) {
+
+  const parts = token.split(".");
+
+  if (parts.length !== 3) {
+    throw new Error("Invalid Google token.");
+  }
+
+  const base64Url = parts[1];
 
   const base64 = base64Url
     .replace(/-/g, "+")
     .replace(/_/g, "/");
 
-  const jsonPayload = decodeURIComponent(
-    atob(base64)
-      .split("")
-      .map(function (c) {
+  const padded =
+    base64 +
+    "=".repeat((4 - (base64.length % 4)) % 4);
 
-        return "%" +
-          ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+  const binary = atob(padded);
 
-      })
-      .join("")
-  );
+  const bytes = new Uint8Array(binary.length);
 
-  return JSON.parse(jsonPayload);
-}
-
-
-/* =========================================
-   PAYMENT PAGE
-========================================= */
-
-function showPaymentPage() {
-
-  if (!currentUser) {
-    showPage("loginPage");
-    return;
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
   }
 
-  showPage("paymentPage");
+  const decoder = new TextDecoder("utf-8");
+
+  return JSON.parse(decoder.decode(bytes));
 
 }
 
 
-/* =========================================
-   START RAZORPAY PAYMENT
-========================================= */
+/* ================= USER UI ================= */
+
+function updateUserUI() {
+
+  if (!currentUser) return;
+
+
+  const nameElements =
+    document.querySelectorAll("[data-user-name]");
+
+  nameElements.forEach((el) => {
+    el.textContent = currentUser.name;
+  });
+
+
+  const emailElements =
+    document.querySelectorAll("[data-user-email]");
+
+  emailElements.forEach((el) => {
+    el.textContent = currentUser.email;
+  });
+
+
+  const avatarElements =
+    document.querySelectorAll("[data-user-avatar]");
+
+  avatarElements.forEach((el) => {
+
+    if (currentUser.picture) {
+
+      el.innerHTML = `
+        <img
+          src="${currentUser.picture}"
+          alt="Profile"
+          style="width:100%;height:100%;object-fit:cover;border-radius:50%;"
+        >
+      `;
+
+    } else {
+
+      el.textContent =
+        currentUser.name.charAt(0).toUpperCase();
+
+    }
+
+  });
+
+}
+
+
+/* =========================================================
+   RAZORPAY PAYMENT
+   ========================================================= */
 
 async function startPayment() {
 
@@ -189,40 +328,33 @@ async function startPayment() {
     return;
   }
 
+
   if (!currentUser) {
 
     showToast("Please login with Google first.");
-
-    showPage("loginPage");
+    showLoginPage();
 
     return;
+
   }
 
 
-  // Check Razorpay SDK
-  if (typeof Razorpay === "undefined") {
-
-    showToast("Payment system is not loaded. Please refresh.");
-
-    return;
-  }
-
-
-  // Check public key
   if (
-    !RAZORPAY_KEY_ID ||
-    RAZORPAY_KEY_ID === "PASTE_YOUR_RAZORPAY_KEY_ID_HERE"
+    typeof Razorpay === "undefined"
   ) {
 
-    showToast("Razorpay Key ID is not configured.");
+    showToast(
+      "Payment system load nahi hua. Page refresh karein."
+    );
 
     return;
+
   }
 
 
   paymentInProgress = true;
 
-  setPaymentButtonLoading(true);
+  showLoading("Creating payment...");
 
 
   try {
@@ -230,22 +362,37 @@ async function startPayment() {
     /*
       IMPORTANT:
 
-      For a real production payment, your backend should
-      create the Razorpay Order and return its order_id.
+      ₹45 ka Razorpay Order BACKEND par create hoga.
 
-      Expected backend response:
-
-      {
-        "order_id": "order_xxxxxxxxx",
-        "amount": 4500,
-        "currency": "INR"
-      }
+      Frontend directly trusted payment amount/order
+      create nahi karega.
     */
 
-    const order = await createPaymentOrder();
+    const orderResponse = await fetch(
+      "/api/create-order",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+
+          amount: PAYMENT_AMOUNT,
+
+          user: {
+            name: currentUser.name,
+
+            email: currentUser.email
+          }
+
+        })
+      }
+    );
 
 
-    if (!order || !order.order_id) {
+    if (!orderResponse.ok) {
 
       throw new Error(
         "Unable to create payment order."
@@ -254,69 +401,115 @@ async function startPayment() {
     }
 
 
-    const options = {
-
-      key: RAZORPAY_KEY_ID,
-
-      amount: order.amount || 4500,
-
-      currency: order.currency || "INR",
-
-      name: "SetuFin",
-
-      description: "Processing Fee",
-
-      order_id: order.order_id,
+    const order = await orderResponse.json();
 
 
-      prefill: {
+    if (!order.order_id) {
 
-        name: currentUser.name || "",
+      throw new Error(
+        "Backend did not return Razorpay order ID."
+      );
 
-        email: currentUser.email || ""
-
-      },
-
-
-      notes: {
-
-        user_id: currentUser.id || ""
-
-      },
+    }
 
 
-      theme: {
-
-        color: "#2563eb"
-
-      },
+    hideLoading();
 
 
-      modal: {
-
-        ondismiss: function () {
-
-          paymentInProgress = false;
-
-          setPaymentButtonLoading(false);
-
-          showToast("Payment cancelled.");
-
-        }
-
-      },
+    openRazorpayCheckout(order);
 
 
-      handler: async function (paymentResponse) {
+  } catch (error) {
 
-        await verifyPayment(paymentResponse);
+    console.error("Create order error:", error);
+
+    hideLoading();
+
+    paymentInProgress = false;
+
+    showToast(
+      "Payment start nahi ho paya. Please try again."
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   RAZORPAY CHECKOUT
+   ========================================================= */
+
+function openRazorpayCheckout(order) {
+
+  const options = {
+
+    key: RAZORPAY_KEY_ID,
+
+    order_id: order.order_id,
+
+    amount: order.amount || 4500,
+
+    currency: order.currency || "INR",
+
+    name: "Your Request",
+
+    description: "Request Processing Fee",
+
+    image: "",
+
+
+    prefill: {
+
+      name: currentUser?.name || "",
+
+      email: currentUser?.email || ""
+
+    },
+
+
+    notes: {
+
+      user_email: currentUser?.email || "",
+
+      user_name: currentUser?.name || ""
+
+    },
+
+
+    theme: {
+
+      color: "#2563eb"
+
+    },
+
+
+    handler: async function (response) {
+
+      await verifyPayment(response);
+
+    },
+
+
+    modal: {
+
+      ondismiss: function () {
+
+        paymentInProgress = false;
+
+        showToast("Payment cancelled.");
 
       }
 
-    };
+    }
+
+  };
 
 
-    const razorpay = new Razorpay(options);
+  try {
+
+    const razorpay =
+      new Razorpay(options);
 
 
     razorpay.on(
@@ -324,16 +517,13 @@ async function startPayment() {
       function (response) {
 
         console.error(
-          "Razorpay Payment Failed:",
+          "Payment failed:",
           response
         );
 
         paymentInProgress = false;
 
-        setPaymentButtonLoading(false);
-
         showToast(
-          response.error?.description ||
           "Payment failed. Please try again."
         );
 
@@ -346,15 +536,15 @@ async function startPayment() {
 
   } catch (error) {
 
-    console.error("Payment Error:", error);
+    console.error(
+      "Razorpay checkout error:",
+      error
+    );
 
     paymentInProgress = false;
 
-    setPaymentButtonLoading(false);
-
     showToast(
-      error.message ||
-      "Unable to start payment."
+      "Unable to open payment window."
     );
 
   }
@@ -362,91 +552,18 @@ async function startPayment() {
 }
 
 
-/* =========================================
-   CREATE PAYMENT ORDER
-========================================= */
-
-/*
-   CHANGE THIS URL to your actual backend API.
-
-   Example:
-
-   https://yourdomain.com/api/create-order
-*/
-
-async function createPaymentOrder() {
-
-  const response = await fetch(
-    "/api/create-order",
-    {
-      method: "POST",
-
-      headers: {
-        "Content-Type": "application/json"
-      },
-
-      body: JSON.stringify({
-
-        amount: PAYMENT_AMOUNT,
-
-        currency: "INR",
-
-        userId: currentUser.id,
-
-        name: currentUser.name,
-
-        email: currentUser.email
-
-      })
-
-    }
-  );
-
-
-  if (!response.ok) {
-
-    throw new Error(
-      "Server could not create payment order."
-    );
-
-  }
-
-
-  return await response.json();
-
-}
-
-
-/* =========================================
-   VERIFY PAYMENT
-========================================= */
-
-/*
-   Payment verification MUST happen on your backend.
-
-   The frontend sends Razorpay's response to backend.
-
-   Backend should verify:
-
-   - razorpay_order_id
-   - razorpay_payment_id
-   - razorpay_signature
-
-   Backend should return:
-
-   {
-      "success": true
-   }
-*/
+/* =========================================================
+   PAYMENT VERIFICATION
+   ========================================================= */
 
 async function verifyPayment(paymentResponse) {
 
+  showLoading("Verifying payment...");
+
+
   try {
 
-    showLoading("Verifying your payment...");
-
-
-    const response = await fetch(
+    const verifyResponse = await fetch(
       "/api/verify-payment",
       {
         method: "POST",
@@ -466,70 +583,63 @@ async function verifyPayment(paymentResponse) {
           razorpay_signature:
             paymentResponse.razorpay_signature,
 
-          userId:
-            currentUser.id,
+          user: {
 
-          name:
-            currentUser.name,
+            name:
+              currentUser?.name || "",
 
-          email:
-            currentUser.email
+            email:
+              currentUser?.email || ""
+
+          }
 
         })
-
       }
     );
 
 
-    if (!response.ok) {
+    const result =
+      await verifyResponse.json();
+
+
+    if (
+      !verifyResponse.ok ||
+      !result.success
+    ) {
 
       throw new Error(
+        result.message ||
         "Payment verification failed."
       );
 
     }
 
 
-    const result = await response.json();
+    /*
+      PAYMENT VERIFIED SUCCESSFULLY
+    */
 
+    paymentInProgress = false;
 
     hideLoading();
 
+    savePaymentLocally(paymentResponse);
 
-    if (result.success === true) {
-
-      paymentInProgress = false;
-
-      setPaymentButtonLoading(false);
-
-      saveLocalPaymentInfo(paymentResponse);
-
-      showSuccessPage();
-
-    } else {
-
-      throw new Error(
-        "Payment could not be verified."
-      );
-
-    }
-
+    showSuccessPage();
 
   } catch (error) {
 
     console.error(
-      "Verification Error:",
+      "Payment verification error:",
       error
     );
 
-    hideLoading();
-
     paymentInProgress = false;
 
-    setPaymentButtonLoading(false);
+    hideLoading();
 
     showToast(
-      "Payment verification failed. Please contact support."
+      "Payment verify nahi ho paya. Support se contact karein."
     );
 
   }
@@ -537,36 +647,27 @@ async function verifyPayment(paymentResponse) {
 }
 
 
-/* =========================================
-   SUCCESS PAGE
-========================================= */
+/* =========================================================
+   SAVE PAYMENT STATUS
+   ========================================================= */
 
-function showSuccessPage() {
-
-  showPage("successPage");
-
-}
-
-
-/* =========================================
-   SAVE LOCAL PAYMENT INFO
-========================================= */
-
-function saveLocalPaymentInfo(paymentResponse) {
+function savePaymentLocally(paymentResponse) {
 
   const paymentData = {
 
     paymentId:
-      paymentResponse.razorpay_payment_id || "",
+      paymentResponse.razorpay_payment_id,
 
     orderId:
-      paymentResponse.razorpay_order_id || "",
+      paymentResponse.razorpay_order_id,
 
-    status:
-      "success",
+    email:
+      currentUser?.email || "",
 
-    amount:
-      PAYMENT_AMOUNT,
+    name:
+      currentUser?.name || "",
+
+    amount: PAYMENT_AMOUNT,
 
     date:
       new Date().toISOString()
@@ -575,187 +676,62 @@ function saveLocalPaymentInfo(paymentResponse) {
 
 
   sessionStorage.setItem(
-    "setufin_payment",
+    "request_payment",
     JSON.stringify(paymentData)
   );
 
 }
 
 
-/* =========================================
-   BUTTON LOADING
-========================================= */
-
-function setPaymentButtonLoading(isLoading) {
-
-  if (!payButton) {
-    return;
-  }
-
-
-  payButton.disabled = isLoading;
-
-
-  if (isLoading) {
-
-    payButtonText.textContent =
-      "Processing...";
-
-    payButton.querySelector("i").className =
-      "fa-solid fa-spinner fa-spin";
-
-  } else {
-
-    payButtonText.textContent =
-      "Pay ₹45 & Continue";
-
-    payButton.querySelector("i").className =
-      "fa-solid fa-arrow-right";
-
-  }
-
-}
-
-
-/* =========================================
-   LOADING OVERLAY
-========================================= */
-
-function showLoading(message) {
-
-  if (!loadingOverlay) {
-    return;
-  }
-
-  loadingText.textContent =
-    message || "Please wait...";
-
-  loadingOverlay.classList.remove("hidden");
-
-}
-
-
-function hideLoading() {
-
-  if (!loadingOverlay) {
-    return;
-  }
-
-  loadingOverlay.classList.add("hidden");
-
-}
-
-
-/* =========================================
-   TOAST
-========================================= */
-
-let toastTimer;
-
-
-function showToast(message) {
-
-  if (!toast || !toastMessage) {
-    return;
-  }
-
-
-  toastMessage.textContent =
-    message;
-
-
-  toast.classList.remove("hidden");
-
-
-  clearTimeout(toastTimer);
-
-
-  toastTimer = setTimeout(() => {
-
-    toast.classList.add("hidden");
-
-  }, 3500);
-
-}
-
-
-/* =========================================
-   TERMS
-========================================= */
-
-function openTerms(event) {
-
-  if (event) {
-    event.preventDefault();
-  }
-
-  const modal =
-    document.getElementById("termsModal");
-
-  if (modal) {
-    modal.classList.remove("hidden");
-  }
-
-}
-
-
-/* =========================================
-   PRIVACY
-========================================= */
-
-function openPrivacy(event) {
-
-  if (event) {
-    event.preventDefault();
-  }
-
-  const modal =
-    document.getElementById("privacyModal");
-
-  if (modal) {
-    modal.classList.remove("hidden");
-  }
-
-}
-
-
-/* =========================================
-   CLOSE MODAL
-========================================= */
-
-function closeModal(id) {
-
-  const modal =
-    document.getElementById(id);
-
-  if (modal) {
-    modal.classList.add("hidden");
-  }
-
-}
-
-
-/* =========================================
-   RESTORE SESSION
-========================================= */
+/* =========================================================
+   SESSION RESTORE
+   ========================================================= */
 
 function restoreSession() {
 
   try {
 
     const savedUser =
-      sessionStorage.getItem("setufin_user");
+      sessionStorage.getItem("request_user");
+
+    const savedPayment =
+      sessionStorage.getItem("request_payment");
+
 
     if (savedUser) {
 
       currentUser =
         JSON.parse(savedUser);
 
-      showPaymentPage();
-
-      return true;
+      updateUserUI();
 
     }
+
+
+    /*
+      Agar payment already verified hai,
+      refresh ke baad success page dikhao.
+    */
+
+    if (savedUser && savedPayment) {
+
+      showSuccessPage();
+
+      return;
+
+    }
+
+
+    if (savedUser) {
+
+      showPaymentPage();
+
+      return;
+
+    }
+
+
+    showLoginPage();
 
   } catch (error) {
 
@@ -764,16 +740,91 @@ function restoreSession() {
       error
     );
 
-  }
+    sessionStorage.clear();
 
-  return false;
+    showLoginPage();
+
+  }
 
 }
 
 
-/* =========================================
-   CLOSE MODAL WHEN CLICKING OUTSIDE
-========================================= */
+/* =========================================================
+   SIGN OUT
+   ========================================================= */
+
+function signOut() {
+
+  currentUser = null;
+
+  sessionStorage.removeItem("request_user");
+  sessionStorage.removeItem("request_payment");
+
+
+  if (
+    typeof google !== "undefined" &&
+    google.accounts &&
+    google.accounts.id
+  ) {
+
+    google.accounts.id.disableAutoSelect();
+
+  }
+
+
+  showLoginPage();
+
+  showToast("Signed out.");
+
+}
+
+
+/* =========================================================
+   TERMS / PRIVACY MODALS
+   ========================================================= */
+
+function openModal(id) {
+
+  const modal =
+    document.getElementById(id);
+
+  if (modal) {
+
+    modal.classList.add("active");
+
+  }
+
+}
+
+
+function closeModal(id) {
+
+  const modal =
+    document.getElementById(id);
+
+  if (modal) {
+
+    modal.classList.remove("active");
+
+  }
+
+}
+
+
+function closeAllModals() {
+
+  document
+    .querySelectorAll(".modal")
+    .forEach((modal) => {
+
+      modal.classList.remove("active");
+
+    });
+
+}
+
+
+/* Close modal when clicking outside */
 
 document.addEventListener(
   "click",
@@ -783,9 +834,166 @@ document.addEventListener(
       event.target.classList.contains("modal")
     ) {
 
-      event.target.classList.add("hidden");
+      event.target.classList.remove(
+        "active"
+      );
 
     }
 
   }
 );
+
+
+/* =========================================================
+   BUTTON EVENT FALLBACKS
+   ========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function () {
+
+    /* Google Login */
+
+    const googleButton =
+      document.getElementById(
+        "google-login-button"
+      );
+
+
+    /* Payment */
+
+    const payButton =
+      document.getElementById(
+        "pay-button"
+      );
+
+    if (payButton) {
+
+      payButton.addEventListener(
+        "click",
+        startPayment
+      );
+
+    }
+
+
+    /* Terms */
+
+    const termsButton =
+      document.getElementById(
+        "terms-button"
+      );
+
+    if (termsButton) {
+
+      termsButton.addEventListener(
+        "click",
+        () => openModal("terms-modal")
+      );
+
+    }
+
+
+    /* Privacy */
+
+    const privacyButton =
+      document.getElementById(
+        "privacy-button"
+      );
+
+    if (privacyButton) {
+
+      privacyButton.addEventListener(
+        "click",
+        () => openModal("privacy-modal")
+      );
+
+    }
+
+
+    /* Close buttons */
+
+    document
+      .querySelectorAll("[data-close-modal]")
+      .forEach((button) => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            closeModal(
+              button.dataset.closeModal
+            );
+
+          }
+        );
+
+      });
+
+
+    /*
+      Google library kabhi-kabhi DOMContentLoaded
+      ke baad load hoti hai, isliye thoda wait.
+    */
+
+    let attempts = 0;
+
+    const googleTimer =
+      setInterval(() => {
+
+        attempts++;
+
+        if (
+          typeof google !== "undefined" &&
+          google.accounts &&
+          google.accounts.id
+        ) {
+
+          clearInterval(googleTimer);
+
+          initGoogleLogin();
+
+        }
+
+
+        if (attempts >= 30) {
+
+          clearInterval(googleTimer);
+
+          console.error(
+            "Google Identity Services timeout."
+          );
+
+        }
+
+      }, 300);
+
+
+    restoreSession();
+
+  }
+);
+
+
+/* =========================================================
+   GLOBAL FUNCTIONS
+   HTML onclick="" ke liye
+   ========================================================= */
+
+window.startPayment =
+  startPayment;
+
+window.handleGoogleLogin =
+  handleGoogleLogin;
+
+window.signOut =
+  signOut;
+
+window.openModal =
+  openModal;
+
+window.closeModal =
+  closeModal;
+
+window.closeAllModals =
+  closeAllModals;
