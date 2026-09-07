@@ -2,358 +2,199 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SetuFin</title>
 
-  <meta name="theme-color" content="#0f172a">
+  <!-- Google Sign-In -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-  <title>SetuFin — Your Request</title>
+  <!-- Razorpay -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
-  <!-- Google Font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
-  >
-
-  <!-- Font Awesome -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-  >
-
-  <!-- Your CSS -->
-  <link rel="stylesheet" href="style.css">
-
-  <!-- Google Identity Services -->
-  <script
-    src="https://accounts.google.com/gsi/client"
-    async
-    defer>
-  </script>
-
-  <!-- Razorpay Checkout -->
-  <script
-    src="https://checkout.razorpay.com/v1/checkout.js">
-  </script>
+  <!-- CSS -->
+  <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
 
-  <main class="app">
+  <!-- ================= LOGIN PAGE ================= -->
+  <section id="login-page" class="page active">
 
-    <!-- =========================
-         LOGIN PAGE
-    ========================== -->
-    <section id="loginPage" class="page login-page">
+    <div class="card login-card">
 
-      <div class="login-container">
-
-        <div class="brand">
-          <div class="brand-logo">
-            SF
-          </div>
-
-          <h1>SetuFin</h1>
-
-          <p>
-            Your request starts here
-          </p>
-        </div>
-
-        <div class="login-card">
-
-          <div class="card-heading">
-            <h2>Welcome</h2>
-
-            <p>
-              Continue with your Google account
-            </p>
-          </div>
-
-          <!-- Google Login -->
-          <div id="googleLoginContainer">
-
-            <!--
-              PASTE YOUR GOOGLE CLIENT ID
-              in script.js
-
-              Example:
-              1234567890-xxxxxxxx.apps.googleusercontent.com
-            -->
-
-            <div
-              id="g_id_onload"
-              data-client_id="PASTE_YOUR_GOOGLE_CLIENT_ID_HERE"
-              data-callback="handleGoogleLogin"
-              data-auto_prompt="false">
-            </div>
-
-            <div
-              class="g_id_signin"
-              data-type="standard"
-              data-size="large"
-              data-theme="outline"
-              data-text="continue_with"
-              data-shape="rectangular"
-              data-logo_alignment="left">
-            </div>
-
-          </div>
-
-          <div class="login-divider">
-            <span>Secure login</span>
-          </div>
-
-          <p class="secure-note">
-            <i class="fa-solid fa-lock"></i>
-            Your account information is protected.
-          </p>
-
-        </div>
-
-        <p class="legal-text">
-          By continuing, you agree to our
-          <a href="#" onclick="openTerms(event)">Terms</a>
-          and
-          <a href="#" onclick="openPrivacy(event)">Privacy Policy</a>.
-        </p>
-
+      <div class="logo">
+        Setu<span>Fin</span>
       </div>
 
-    </section>
+      <h1>Your request starts here</h1>
 
+      <p class="subtitle">
+        Sign in with Google to continue with your request.
+      </p>
 
-    <!-- =========================
-         PAYMENT PAGE
-    ========================== -->
-    <section id="paymentPage" class="page payment-page hidden">
+      <!-- Google Login -->
+      <div id="google-signin-btn-gate"></div>
 
-      <div class="payment-container">
-
-        <div class="top-brand">
-          <div class="small-logo">SF</div>
-          <span>SetuFin</span>
-        </div>
-
-        <div class="payment-icon">
-          <i class="fa-solid fa-shield-halved"></i>
-        </div>
-
-        <h1>Complete Your Request</h1>
-
-        <p class="payment-subtitle">
-          A small processing fee is required to continue.
-        </p>
-
-        <div class="fee-card">
-
-          <div class="fee-row">
-            <span>Processing Fee</span>
-            <strong>₹45</strong>
-          </div>
-
-          <div class="fee-line"></div>
-
-          <div class="fee-row total">
-            <span>Total Payable</span>
-            <strong>₹45</strong>
-          </div>
-
-        </div>
-
-        <div class="payment-info">
-
-          <div class="info-item">
-            <i class="fa-solid fa-lock"></i>
-
-            <div>
-              <strong>Secure Payment</strong>
-              <p>Payment is processed securely.</p>
-            </div>
-          </div>
-
-          <div class="info-item">
-            <i class="fa-solid fa-bolt"></i>
-
-            <div>
-              <strong>Quick Processing</strong>
-              <p>Continue after successful payment.</p>
-            </div>
-          </div>
-
-        </div>
-
-        <button
-          id="payButton"
-          class="primary-button"
-          type="button"
-          onclick="startPayment()">
-
-          <span id="payButtonText">
-            Pay ₹45 & Continue
-          </span>
-
-          <i class="fa-solid fa-arrow-right"></i>
-
-        </button>
-
-        <p class="payment-security">
-          <i class="fa-solid fa-shield"></i>
-          Secure payment powered by Razorpay
-        </p>
-
+      <div class="secure-text">
+        🔒 Secure & private
       </div>
 
-    </section>
-
-
-    <!-- =========================
-         REQUEST SAVED PAGE
-    ========================== -->
-    <section id="successPage" class="page success-page hidden">
-
-      <div class="success-container">
-
-        <div class="success-icon">
-          <i class="fa-solid fa-check"></i>
-        </div>
-
-        <h1>Your request saved</h1>
-
-        <p>
-          Your request has been successfully saved.
-        </p>
-
-        <div class="request-card">
-
-          <div class="request-status">
-            <span class="status-dot"></span>
-            Request Saved
-          </div>
-
-          <p>
-            You can continue when the next step is available.
-          </p>
-
-        </div>
-
-        <div class="success-note">
-          <i class="fa-solid fa-circle-info"></i>
-
-          <span>
-            Please keep your payment confirmation for your records.
-          </span>
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- =========================
-         TERMS MODAL
-    ========================== -->
-    <div
-      id="termsModal"
-      class="modal hidden">
-
-      <div class="modal-box">
-
-        <button
-          class="modal-close"
-          onclick="closeModal('termsModal')">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-
-        <h2>Terms & Conditions</h2>
-
-        <p>
-          Please review the applicable terms before continuing.
-        </p>
-
-        <button
-          class="secondary-button"
-          onclick="closeModal('termsModal')">
-          Close
-        </button>
-
+      <div class="legal-text">
+        By continuing, you agree to our
+        <button onclick="openModal('terms-modal')">Terms</button>
+        and
+        <button onclick="openModal('privacy-modal')">Privacy Policy</button>.
       </div>
 
     </div>
 
+  </section>
 
-    <!-- =========================
-         PRIVACY MODAL
-    ========================== -->
-    <div
-      id="privacyModal"
-      class="modal hidden">
 
-      <div class="modal-box">
+  <!-- ================= PAYMENT PAGE ================= -->
+  <section id="payment-page" class="page">
 
-        <button
-          class="modal-close"
-          onclick="closeModal('privacyModal')">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+    <div class="card payment-card">
 
-        <h2>Privacy Policy</h2>
+      <div class="logo">
+        Setu<span>Fin</span>
+      </div>
 
-        <p>
-          Your information is handled according to the applicable
-          privacy policy.
-        </p>
+      <h1>Complete Your Request</h1>
 
-        <button
-          class="secondary-button"
-          onclick="closeModal('privacyModal')">
-          Close
-        </button>
+      <p class="subtitle">
+        A small processing fee is required to continue.
+      </p>
+
+      <div class="user-box">
+        <div id="user-name">User</div>
+        <div id="user-email">user@email.com</div>
+      </div>
+
+      <div class="price-box">
+
+        <div class="price-row">
+          <span>Processing Fee</span>
+          <strong>₹45</strong>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="price-row total">
+          <span>Total</span>
+          <strong>₹45</strong>
+        </div>
 
       </div>
 
-    </div>
+      <button id="pay-btn" class="primary-btn" onclick="startPayment()">
+        Pay ₹45 & Continue
+      </button>
 
-
-    <!-- =========================
-         LOADING OVERLAY
-    ========================== -->
-    <div
-      id="loadingOverlay"
-      class="loading-overlay hidden">
-
-      <div class="loader"></div>
-
-      <p id="loadingText">
-        Please wait...
+      <p class="payment-note">
+        🔒 Payments are securely processed by Razorpay.
       </p>
 
     </div>
 
+  </section>
 
-    <!-- =========================
-         TOAST
-    ========================== -->
-    <div
-      id="toast"
-      class="toast hidden">
 
-      <i class="fa-solid fa-circle-info"></i>
+  <!-- ================= SUCCESS PAGE ================= -->
+  <section id="success-page" class="page">
 
-      <span id="toastMessage">
-        Something went wrong.
-      </span>
+    <div class="card success-card">
+
+      <div class="success-icon">
+        ✓
+      </div>
+
+      <h1>Your request saved</h1>
+
+      <p class="subtitle">
+        Your request has been successfully saved.
+      </p>
+
+      <div class="saved-box">
+        <strong>Request Saved</strong>
+        <span>You can safely close this page.</span>
+      </div>
 
     </div>
 
-  </main>
+  </section>
 
 
-  <!-- Your JavaScript -->
-  <script src="script.js"></script>
+  <!-- ================= TERMS MODAL ================= -->
+  <div id="terms-modal" class="modal">
+
+    <div class="modal-content">
+
+      <button class="modal-close" onclick="closeModal('terms-modal')">
+        ×
+      </button>
+
+      <h2>Terms & Conditions</h2>
+
+      <p>
+        By using this website, you agree to use the service
+        responsibly and provide accurate information.
+      </p>
+
+      <p>
+        The processing fee is charged for handling your request.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- ================= PRIVACY MODAL ================= -->
+  <div id="privacy-modal" class="modal">
+
+    <div class="modal-content">
+
+      <button class="modal-close" onclick="closeModal('privacy-modal')">
+        ×
+      </button>
+
+      <h2>Privacy Policy</h2>
+
+      <p>
+        We may collect basic information such as your name and
+        email address when you sign in.
+      </p>
+
+      <p>
+        Your information is used only for processing your request
+        and providing the service.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- ================= LOADING ================= -->
+  <div id="loading-overlay" class="loading-overlay">
+
+    <div class="loader"></div>
+
+    <p id="loading-text">
+      Please wait...
+    </p>
+
+  </div>
+
+
+  <!-- ================= TOAST ================= -->
+  <div id="toast" class="toast"></div>
+
+
+  <!-- JS -->
+  <script src="./script.js"></script>
 
 </body>
 </html>
