@@ -8,19 +8,16 @@
     content="width=device-width, initial-scale=1.0"
   >
 
-  <meta
-    name="description"
-    content="A modern dating profile platform."
+  <title>VIVRA — Find Someone Real</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap"
+    rel="stylesheet"
   >
-
-  <title>Heartly — Find Your Connection</title>
-
-  <!-- Google Identity Services -->
-  <script
-    src="https://accounts.google.com/gsi/client"
-    async
-    defer>
-  </script>
 
   <!-- Font Awesome -->
   <link
@@ -28,70 +25,117 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
   >
 
-  <!-- CSS -->
-  <link
-    rel="stylesheet"
-    href="style.css"
-  >
+  <!-- Your CSS -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Official Google Identity Services -->
+  <script
+    src="https://accounts.google.com/gsi/client"
+    async
+    defer>
+  </script>
 </head>
 
 <body>
 
+<div class="app-shell">
+
+
   <!-- =====================================================
-       LOGIN
-       ===================================================== -->
+       LOGIN SCREEN
+  ====================================================== -->
 
-  <main class="app">
+  <section
+    id="login-gate"
+    class="screen-content active"
+  >
 
-    <section
-      id="login-gate"
-      class="screen-content active"
-    >
+    <div class="auth-layout">
 
-      <div class="auth-card">
+      <!-- LEFT VISUAL -->
+      <div class="auth-visual">
 
-        <div class="brand">
-          <div class="brand-icon">
-            <i class="fa-solid fa-heart"></i>
-          </div>
+        <div class="visual-overlay"></div>
 
-          <h1>Heartly</h1>
-
-          <p>
-            Find someone who feels like home.
-          </p>
+        <div class="brand-mark">
+          VIVRA<span class="brand-dot"></span>
         </div>
 
+        <div class="visual-copy">
 
-        <div class="auth-content">
+          <span class="eyebrow">
+            A better way to meet
+          </span>
+
+          <h1>
+            Find someone<br>
+            <em>worth knowing.</em>
+          </h1>
+
+          <p>
+            A more intentional dating experience
+            for people looking for genuine
+            conversations and meaningful connections.
+          </p>
+
+          <div class="social-proof">
+
+            <div class="avatar-stack">
+              <span>AK</span>
+              <span>RS</span>
+              <span>NM</span>
+              <span>+</span>
+            </div>
+
+            <div>
+              <strong>Real people. Real connections.</strong>
+              <small>Start your journey today.</small>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- RIGHT LOGIN PANEL -->
+      <div class="auth-panel">
+
+        <div class="mobile-brand">
+          VIVRA<span class="brand-dot"></span>
+        </div>
+
+        <div class="auth-heading">
+
+          <span class="eyebrow">
+            Welcome to Vivra
+          </span>
 
           <h2>
-            Welcome back
+            Meet someone
+            <em>real.</em>
           </h2>
 
-          <p class="auth-subtitle">
-            Sign in with your Google account
+          <p>
+            Sign in securely with your Google account
             to create your dating profile.
           </p>
 
+        </div>
 
-          <!-- =================================================
-               REAL GOOGLE BUTTON
-               DO NOT REPLACE THIS WITH A CUSTOM BUTTON
-               ================================================= -->
 
+        <div class="login-card">
+
+          <!-- OFFICIAL GOOGLE BUTTON -->
           <div
             id="google-signin"
-            class="google-container"
-          ></div>
-
+            class="google-container">
+          </div>
 
           <div class="secure-note">
             <i class="fa-solid fa-shield-halved"></i>
-
-            <span>
-              Secure sign-in powered by Google
-            </span>
+            Your account is protected by Google
           </div>
 
         </div>
@@ -101,122 +145,194 @@
 
           <p>
             By continuing, you agree to our
-            Terms & Privacy Policy.
+            Terms of Service and Privacy Policy.
           </p>
+
+          <span>
+            18+ ONLY
+          </span>
 
         </div>
 
       </div>
 
-    </section>
+    </div>
+
+  </section>
 
 
-    <!-- =====================================================
-         AGE VERIFICATION
-         ===================================================== -->
 
-    <section
-      id="age-screen"
-      class="screen-content"
-    >
+  <!-- =====================================================
+       AGE SCREEN
+  ====================================================== -->
 
-      <div class="form-card">
+  <section
+    id="age-screen"
+    class="screen-content"
+  >
+
+    <div class="onboarding-wrap">
+
+      <div class="onboarding-top">
+
+        <button
+          class="back-btn"
+          onclick="goBackToLogin()"
+          aria-label="Back"
+        >
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+
+        <div class="mini-brand">
+          VIVRA<span class="brand-dot"></span>
+        </div>
+
+        <span class="step-label">
+          STEP 01 / 06
+        </span>
+
+      </div>
+
+
+      <div class="progress-track">
+        <div
+          id="age-progress"
+          class="progress-fill"
+          style="width:16.66%">
+        </div>
+      </div>
+
+
+      <div class="onboarding-card">
 
         <div class="step-icon">
-          <i class="fa-solid fa-calendar-check"></i>
+          <i class="fa-solid fa-cake-candles"></i>
         </div>
 
-        <div class="step-label">
-          STEP 1 OF 2
-        </div>
+        <span class="eyebrow">
+          Before we begin
+        </span>
 
         <h2>
-          First, let's verify your age.
+          How old are you?
         </h2>
 
-        <p>
-          You must be 18 or older to use
-          this dating platform.
+        <p class="step-description">
+          Vivra is an adults-only dating platform.
+          You must be at least 18 years old to continue.
         </p>
 
 
-        <label for="dob">
+        <label class="field-label" for="dob">
           Date of birth
         </label>
 
-        <input
-          type="date"
-          id="dob"
-          class="form-input"
-        >
+        <div class="input-wrap">
+
+          <i class="fa-regular fa-calendar"></i>
+
+          <input
+            id="dob"
+            type="date"
+            autocomplete="bday"
+          >
+
+        </div>
 
 
         <button
-          type="button"
-          class="primary-btn"
+          class="primary-btn full-btn"
           onclick="verifyAge()"
         >
           Continue
           <i class="fa-solid fa-arrow-right"></i>
         </button>
 
+
+        <div class="privacy-hint">
+          <i class="fa-solid fa-lock"></i>
+          Your date of birth stays private.
+        </div>
+
       </div>
 
-    </section>
+    </div>
+
+  </section>
 
 
-    <!-- =====================================================
-         QUESTIONS
-         ===================================================== -->
 
-    <section
-      id="questions-screen"
-      class="screen-content"
-    >
+  <!-- =====================================================
+       QUESTIONS SCREEN
+  ====================================================== -->
 
-      <div class="form-card">
+  <section
+    id="questions-screen"
+    class="screen-content"
+  >
 
-        <div class="progress-top">
+    <div class="onboarding-wrap">
 
-          <span id="question-number">
-            1 / 5
-          </span>
+      <div class="onboarding-top">
 
+        <button
+          class="back-btn"
+          onclick="previousQuestion()"
+          aria-label="Back"
+        >
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+
+        <div class="mini-brand">
+          VIVRA<span class="brand-dot"></span>
         </div>
 
-        <div class="progress-bar">
+        <span
+          id="question-number"
+          class="step-label">
+          STEP 02 / 06
+        </span>
 
-          <div
-            id="progress-fill"
-            class="progress-fill"
-          ></div>
-
-        </div>
+      </div>
 
 
-        <div class="question-header">
-
-          <h2 id="question-title">
-            What's your name?
-          </h2>
-
-          <p id="question-subtitle">
-            Tell us what you'd like people to call you.
-          </p>
-
-        </div>
-
+      <div class="progress-track">
 
         <div
-          id="question-container"
-          class="question-container"
-        ></div>
+          id="progress-fill"
+          class="progress-fill">
+        </div>
+
+      </div>
+
+
+      <div class="question-card">
+
+        <div class="question-icon">
+          <i class="fa-solid fa-sparkles"></i>
+        </div>
+
+        <span class="eyebrow">
+          Tell us about you
+        </span>
+
+        <h2 id="question-title">
+          What's your name?
+        </h2>
+
+        <p
+          id="question-subtitle"
+          class="step-description">
+          This is how other people will see you.
+        </p>
+
+
+        <div id="question-container"></div>
 
 
         <button
           id="next-btn"
-          type="button"
-          class="primary-btn"
+          class="primary-btn full-btn"
           onclick="nextQuestion()"
         >
           Continue
@@ -225,263 +341,299 @@
 
       </div>
 
-    </section>
+    </div>
+
+  </section>
 
 
-    <!-- =====================================================
-         PAYMENT
-         ===================================================== -->
 
-    <section
-      id="payment-screen"
-      class="screen-content"
-    >
+  <!-- =====================================================
+       PAYMENT SCREEN
+  ====================================================== -->
 
-      <div class="payment-card">
+  <section
+    id="payment-screen"
+    class="screen-content"
+  >
 
-        <div class="payment-icon">
-          <i class="fa-solid fa-heart"></i>
+    <div class="onboarding-wrap">
+
+      <div class="onboarding-top">
+
+        <button
+          class="back-btn"
+          onclick="previousQuestion()"
+          aria-label="Back"
+        >
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+
+        <div class="mini-brand">
+          VIVRA<span class="brand-dot"></span>
         </div>
 
         <span class="step-label">
           FINAL STEP
         </span>
 
+      </div>
+
+
+      <div class="payment-card">
+
+        <div class="payment-badge">
+          <i class="fa-solid fa-star"></i>
+          Profile creation
+        </div>
+
+
+        <div class="payment-icon">
+          <i class="fa-solid fa-heart"></i>
+        </div>
+
+
+        <span class="eyebrow">
+          Almost there
+        </span>
+
         <h2>
-          Complete your profile
+          Your profile is<br>
+          <em>ready.</em>
         </h2>
 
         <p>
-          Your profile is ready.
-          Complete the one-time profile creation payment.
+          Complete the profile creation payment
+          to finish setting up your Vivra profile.
         </p>
 
 
         <div class="price-box">
 
-          <span>
-            Profile Creation
-          </span>
+          <div>
+            <span>Dating Profile Creation</span>
 
-          <strong>
-            ₹<span id="payment-price">45</span>
+            <small>
+              One-time payment
+            </small>
+          </div>
+
+          <strong id="payment-price">
+            ₹45
           </strong>
+
+        </div>
+
+
+        <div class="payment-points">
+
+          <div>
+            <i class="fa-solid fa-circle-check"></i>
+            Complete your dating profile
+          </div>
+
+          <div>
+            <i class="fa-solid fa-circle-check"></i>
+            Start discovering people
+          </div>
+
+          <div>
+            <i class="fa-solid fa-circle-check"></i>
+            One-time profile creation fee
+          </div>
 
         </div>
 
 
         <button
           id="pay-btn"
-          type="button"
-          class="primary-btn"
+          class="primary-btn full-btn pay-button"
           onclick="startPayment()"
         >
-          Pay ₹45
-          <i class="fa-solid fa-lock"></i>
+          Pay ₹45 & Continue
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
         </button>
 
 
-        <div class="payment-security">
+        <button
+          id="payment-done-btn"
+          class="secondary-btn full-btn"
+          onclick="paymentCompleted()"
+        >
+          I've completed payment
+        </button>
 
-          <i class="fa-solid fa-shield-halved"></i>
 
-          <span>
-            Secure payment powered by Razorpay
-          </span>
-
+        <div class="payment-note">
+          <i class="fa-solid fa-lock"></i>
+          Secure payment powered by Razorpay
         </div>
 
       </div>
 
-    </section>
+    </div>
+
+  </section>
 
 
-    <!-- =====================================================
-         PROFILE CREATED
-         ===================================================== -->
 
-    <section
-      id="profile-created-screen"
-      class="screen-content"
-    >
+  <!-- =====================================================
+       SUCCESS SCREEN
+  ====================================================== -->
 
-      <div class="success-card">
+  <section
+    id="profile-created-screen"
+    class="screen-content"
+  >
 
-        <div class="success-icon">
+    <div class="success-wrap">
+
+      <div class="success-animation">
+
+        <div class="success-ring">
           <i class="fa-solid fa-check"></i>
         </div>
 
-        <h2>
-          Profile saved!
-        </h2>
-
-        <p>
-          Your profile information has been saved.
-        </p>
-
-        <button
-          type="button"
-          class="primary-btn"
-          onclick="openDatingHome()"
-        >
-          Enter Heartly
-          <i class="fa-solid fa-arrow-right"></i>
-        </button>
-
       </div>
 
-    </section>
+
+      <span class="eyebrow">
+        You're all set
+      </span>
+
+      <h2>
+        Welcome to<br>
+        <em>Vivra.</em>
+      </h2>
+
+      <p>
+        Your profile has been created.
+        It's time to start discovering
+        meaningful connections.
+      </p>
 
 
-    <!-- =====================================================
-         DATING HOME
-         ===================================================== -->
+      <button
+        class="primary-btn"
+        onclick="showDatingHome()"
+      >
+        Start discovering
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
 
-    <section
-      id="dating-home"
-      class="screen-content"
-    >
+    </div>
 
-      <div class="home-page">
+  </section>
 
-        <header class="app-header">
 
-          <div>
-            <span class="eyebrow">
-              HEARTLY
-            </span>
 
-            <h1>
-              Discover
-            </h1>
+  <!-- =====================================================
+       DATING HOME
+  ====================================================== -->
+
+  <section
+    id="dating-home"
+    class="screen-content"
+  >
+
+    <div class="app-screen">
+
+
+      <header class="app-header">
+
+        <div>
+
+          <div class="app-logo">
+            VIVRA<span class="brand-dot"></span>
           </div>
 
-          <button
-            type="button"
-            class="icon-btn"
-            onclick="showMyProfile()"
-            aria-label="My profile"
-          >
-            <i class="fa-regular fa-user"></i>
+          <div class="header-subtitle">
+            Discover someone new
+          </div>
+
+        </div>
+
+
+        <button
+          class="icon-btn"
+          onclick="showMyProfile()"
+          aria-label="Profile"
+        >
+          <i class="fa-regular fa-user"></i>
+        </button>
+
+      </header>
+
+
+
+      <main class="discovery-area">
+
+        <div class="discovery-heading">
+
+          <div>
+
+            <span class="eyebrow">
+              Discover
+            </span>
+
+            <h2>
+              People for you
+            </h2>
+
+          </div>
+
+
+          <button class="filter-btn">
+            <i class="fa-solid fa-sliders"></i>
+            Filters
           </button>
 
-        </header>
+        </div>
 
 
         <div
           id="dating-profiles"
-          class="dating-profiles"
-        ></div>
-
-      </div>
+          class="profile-feed">
+        </div>
 
 
-      <nav class="bottom-nav">
-
-        <button
-          type="button"
-          class="nav-item active"
-          onclick="showDatingHome()"
-        >
-          <i class="fa-solid fa-compass"></i>
-          <span>Discover</span>
-        </button>
-
-
-        <button
-          type="button"
-          class="nav-item"
-          onclick="showMyProfile()"
-        >
-          <i class="fa-regular fa-user"></i>
-          <span>Profile</span>
-        </button>
-
-      </nav>
-
-    </section>
-
-
-    <!-- =====================================================
-         MY PROFILE
-         ===================================================== -->
-
-    <section
-      id="my-profile-screen"
-      class="screen-content"
-    >
-
-      <div class="profile-page">
-
-        <header class="app-header">
-
-          <div>
-            <span class="eyebrow">
-              YOUR ACCOUNT
-            </span>
-
-            <h1>
-              My Profile
-            </h1>
-          </div>
+        <div class="action-row">
 
           <button
-            type="button"
-            class="icon-btn"
-            onclick="showDatingHome()"
+            class="round-action pass-action"
+            onclick="passProfile()"
+            aria-label="Pass"
           >
             <i class="fa-solid fa-xmark"></i>
           </button>
 
-        </header>
 
-
-        <div class="my-profile-card">
-
-          <img
-            id="my-profile-image"
-            src="https://www.gravatar.com/avatar/?d=mp"
-            alt="Profile photo"
-            class="profile-photo"
+          <button
+            class="round-action super-action"
+            onclick="superLikeProfile()"
+            aria-label="Super Like"
           >
-
-
-          <h2 id="my-profile-name">
-            User
-          </h2>
-
-
-          <p
-            id="my-profile-city"
-            class="profile-location"
-          ></p>
-
-
-          <p
-            id="my-profile-bio"
-            class="my-bio"
-          ></p>
+            <i class="fa-solid fa-star"></i>
+          </button>
 
 
           <button
-            type="button"
-            class="logout-btn"
-            onclick="logout()"
+            class="round-action like-action"
+            onclick="likeProfile()"
+            aria-label="Like"
           >
-            <i class="fa-solid fa-arrow-right-from-bracket"></i>
-            Log out
+            <i class="fa-solid fa-heart"></i>
           </button>
 
         </div>
 
-      </div>
+      </main>
+
 
 
       <nav class="bottom-nav">
 
         <button
-          type="button"
-          class="nav-item"
+          class="nav-item active"
           onclick="showDatingHome()"
         >
           <i class="fa-solid fa-compass"></i>
@@ -490,8 +642,25 @@
 
 
         <button
-          type="button"
-          class="nav-item active"
+          class="nav-item"
+          onclick="showMatches()"
+        >
+          <i class="fa-regular fa-heart"></i>
+          <span>Matches</span>
+        </button>
+
+
+        <button
+          class="nav-item"
+          onclick="showMessages()"
+        >
+          <i class="fa-regular fa-comment"></i>
+          <span>Messages</span>
+        </button>
+
+
+        <button
+          class="nav-item"
           onclick="showMyProfile()"
         >
           <i class="fa-regular fa-user"></i>
@@ -500,23 +669,158 @@
 
       </nav>
 
-    </section>
+    </div>
+
+  </section>
 
 
-    <!-- =====================================================
-         TOAST
-         ===================================================== -->
 
-    <div
-      id="toast"
-      class="toast"
-    ></div>
+  <!-- =====================================================
+       MY PROFILE
+  ====================================================== -->
 
-  </main>
+  <section
+    id="my-profile-screen"
+    class="screen-content"
+  >
+
+    <div class="app-screen">
 
 
-  <!-- JS -->
-  <script src="script.js"></script>
+      <header class="app-header profile-header">
+
+        <button
+          class="back-btn"
+          onclick="showDatingHome()"
+          aria-label="Back"
+        >
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+
+
+        <h3>
+          My Profile
+        </h3>
+
+
+        <button
+          class="icon-btn"
+          onclick="logout()"
+          aria-label="Logout"
+        >
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        </button>
+
+      </header>
+
+
+
+      <main class="my-profile-content">
+
+
+        <div class="my-profile-hero">
+
+          <div
+            id="my-profile-avatar"
+            class="my-avatar">
+            U
+          </div>
+
+
+          <div>
+
+            <h2 id="my-profile-name">
+              User
+            </h2>
+
+            <p id="my-profile-city">
+              Your city
+            </p>
+
+          </div>
+
+        </div>
+
+
+
+        <div class="profile-details">
+
+
+          <div class="detail-card">
+
+            <small>
+              About me
+            </small>
+
+            <p id="my-profile-bio">
+              Your bio will appear here.
+            </p>
+
+          </div>
+
+
+          <div class="detail-card">
+
+            <small>
+              Looking for
+            </small>
+
+            <strong id="my-profile-looking">
+              —
+            </strong>
+
+          </div>
+
+
+          <div class="detail-card">
+
+            <small>
+              Email
+            </small>
+
+            <strong id="my-profile-email">
+              —
+            </strong>
+
+          </div>
+
+        </div>
+
+
+
+        <button
+          class="logout-btn"
+          onclick="logout()"
+        >
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          Log out
+        </button>
+
+      </main>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- =====================================================
+       TOAST
+  ====================================================== -->
+
+  <div
+    id="toast"
+    class="toast">
+    <i class="fa-solid fa-circle-info"></i>
+    <span id="toast-message">Done</span>
+  </div>
+
+
+</div>
+
+
+<!-- JavaScript -->
+<script src="script.js"></script>
 
 </body>
 </html>
