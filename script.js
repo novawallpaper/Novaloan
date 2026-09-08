@@ -1,123 +1,268 @@
 /* =========================================================
-   REQUEST WEBSITE — Google Login + ₹45 Razorpay
-   Flow:
-   Google Login → Payment Page → ₹45 Payment
-   → Backend Verification → Request Saved
-   ========================================================= */
+   LUMA DATING APP
+   Frontend-only version
+========================================================= */
 
-/* ================= PUBLIC CONFIG ================= */
+
+/* =========================================================
+   CONFIG
+========================================================= */
 
 const GOOGLE_CLIENT_ID =
-  "470674864622-aqmvbmn0r33nasost2814phsqljgtc3l.apps.googleusercontent.com";
+  "452456583028-1l86bibq60ggkl3o1h5j88sed7v04eof.apps.googleusercontent.com";
 
-const RAZORPAY_KEY_ID =
-  "rzp_live_TCZM7OsD80tNpH";
+const PAYMENT_LINK =
+  "https://rzp.io/rzp/EDfHHkBO";
 
-const PAYMENT_AMOUNT = 45;
+const STORAGE_USER =
+  "dating_google_user";
+
+const STORAGE_PROFILE =
+  "dating_profile";
 
 
-/* ================= APP STATE ================= */
+/* =========================================================
+   STATE
+========================================================= */
 
 let currentUser = null;
-let paymentInProgress = false;
+let currentQuestion = 0;
+
+let profileAnswers = {
+  name: "",
+  gender: "",
+  lookingFor: "",
+  city: "",
+  bio: ""
+};
+
+let ageVerified = false;
+
+let currentDiscoveryIndex = 0;
 
 
-/* ================= PAGE ELEMENTS ================= */
+/* =========================================================
+   QUESTIONS
+========================================================= */
 
-const loginPage = document.getElementById("login-page");
-const paymentPage = document.getElementById("payment-page");
-const successPage = document.getElementById("success-page");
+const questions = [
 
-const loadingOverlay = document.getElementById("loading-overlay");
-const toast = document.getElementById("toast");
+  {
+    key: "name",
 
+    title: "What's your name?",
 
-/* ================= PAGE CONTROL ================= */
+    eyebrow: "Let's get to know you",
 
-function showPage(page) {
-  document.querySelectorAll(".page").forEach((el) => {
-    el.classList.remove("active");
-  });
+    description:
+      "This is how people will see you on LUMA.",
 
-  if (page) {
-    page.classList.add("active");
+    icon:
+      '<i class="fa-regular fa-user"></i>',
+
+    type: "text",
+
+    placeholder: "Enter your first name"
+  },
+
+  {
+    key: "gender",
+
+    title: "How do you identify?",
+
+    eyebrow: "A little about you",
+
+    description:
+      "Choose the option that feels right for you.",
+
+    icon:
+      '<i class="fa-solid fa-person"></i>',
+
+    type: "options",
+
+    options: [
+      "Male",
+      "Female"
+    ]
+  },
+
+  {
+    key: "lookingFor",
+
+    title: "Who are you looking for?",
+
+    eyebrow: "Your preference",
+
+    description:
+      "Tell us who you'd like to meet.",
+
+    icon:
+      '<i class="fa-regular fa-heart"></i>',
+
+    type: "options",
+
+    options: [
+      "Male",
+      "Female"
+    ]
+  },
+
+  {
+    key: "city",
+
+    title: "Where are you based?",
+
+    eyebrow: "Your area",
+
+    description:
+      "We'll use this to make discovery more relevant.",
+
+    icon:
+      '<i class="fa-solid fa-location-dot"></i>',
+
+    type: "text",
+
+    placeholder: "e.g. Delhi"
+  },
+
+  {
+    key: "bio",
+
+    title: "Tell us about yourself.",
+
+    eyebrow: "Your introduction",
+
+    description:
+      "A few words can make the first hello much easier.",
+
+    icon:
+      '<i class="fa-regular fa-comment-dots"></i>',
+
+    type: "textarea",
+
+    placeholder:
+      "What are you into? What makes you smile?"
   }
-}
+
+];
 
 
-function showLoginPage() {
-  showPage(loginPage);
-}
+/* =========================================================
+   DEMO DISCOVERY PROFILES
+========================================================= */
 
+const discoveryProfiles = [
 
-function showPaymentPage() {
-  showPage(paymentPage);
-}
+  {
+    name: "Aanya",
+    age: 21,
+    city: "Delhi",
+    initials: "A",
+    colorClass: "one",
+    bio:
+      "Coffee, late-night conversations and finding new places around the city.",
+    tag: "New here"
+  },
 
+  {
+    name: "Riya",
+    age: 22,
+    city: "Delhi",
+    initials: "R",
+    colorClass: "two",
+    bio:
+      "Music lover, weekend explorer and always looking for a good food spot.",
+    tag: "Popular"
+  },
 
-function showSuccessPage() {
-  showPage(successPage);
-}
+  {
+    name: "Sara",
+    age: 20,
+    city: "Delhi",
+    initials: "S",
+    colorClass: "three",
+    bio:
+      "Books, sunsets and spontaneous plans. Say hi if you're curious.",
+    tag: "Online now"
+  },
 
-
-/* ================= LOADING ================= */
-
-function showLoading(text = "Please wait...") {
-  if (!loadingOverlay) return;
-
-  const textElement =
-    loadingOverlay.querySelector(".loading-text");
-
-  if (textElement) {
-    textElement.textContent = text;
+  {
+    name: "Meera",
+    age: 23,
+    city: "Delhi",
+    initials: "M",
+    colorClass: "four",
+    bio:
+      "Creative soul who believes the best conversations happen unexpectedly.",
+    tag: "Recommended"
   }
 
-  loadingOverlay.classList.add("active");
-}
+];
 
 
-function hideLoading() {
-  if (!loadingOverlay) return;
+/* =========================================================
+   INITIALIZE
+========================================================= */
 
-  loadingOverlay.classList.remove("active");
-}
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    initializeGoogleLogin();
+
+    loadSavedProfile();
+
+    renderDatingProfiles();
+
+  }
+);
 
 
-/* ================= TOAST ================= */
+/* =========================================================
+   SCREEN MANAGEMENT
+========================================================= */
 
-let toastTimer;
+function showScreen(screenId) {
 
-function showToast(message) {
-  if (!toast) {
-    alert(message);
-    return;
+  document
+    .querySelectorAll(".screen-content")
+    .forEach(screen => {
+
+      screen.classList.remove("active");
+
+    });
+
+  const target =
+    document.getElementById(screenId);
+
+  if (target) {
+
+    target.classList.add("active");
+
+    window.scrollTo({
+      top: 0,
+      behavior: "instant"
+    });
+
   }
 
-  toast.textContent = message;
-  toast.classList.add("show");
-
-  clearTimeout(toastTimer);
-
-  toastTimer = setTimeout(() => {
-    toast.classList.remove("show");
-  }, 3000);
 }
 
 
 /* =========================================================
    GOOGLE LOGIN
-   ========================================================= */
+========================================================= */
 
-function initGoogleLogin() {
+function initializeGoogleLogin() {
 
   if (
-    typeof google === "undefined" ||
+    !window.google ||
     !google.accounts ||
     !google.accounts.id
   ) {
-    console.error("Google Identity Services not loaded.");
-    showToast("Google Login load nahi ho paya.");
+
     return;
+
   }
 
   try {
@@ -126,7 +271,8 @@ function initGoogleLogin() {
 
       client_id: GOOGLE_CLIENT_ID,
 
-      callback: handleGoogleLogin,
+      callback:
+        handleGoogleCredential,
 
       auto_select: false,
 
@@ -134,301 +280,90 @@ function initGoogleLogin() {
 
     });
 
-
-    const buttonContainer =
-      document.getElementById("google-login-button");
-
-    if (buttonContainer) {
-
-      buttonContainer.innerHTML = "";
-
-      google.accounts.id.renderButton(
-        buttonContainer,
-        {
-          theme: "outline",
-          size: "large",
-          shape: "rectangular",
-          width: 320,
-          text: "continue_with"
-        }
-      );
-
-    }
-
   } catch (error) {
 
-    console.error("Google initialization error:", error);
-
-    showToast("Google Login setup error.");
-
-  }
-}
-
-
-/* ================= GOOGLE CALLBACK ================= */
-
-function handleGoogleLogin(response) {
-
-  if (!response || !response.credential) {
-
-    showToast("Google Login failed.");
-    return;
-
-  }
-
-  try {
-
-    const user = decodeGoogleJWT(response.credential);
-
-    if (!user || !user.email) {
-      throw new Error("Invalid Google account information.");
-    }
-
-    currentUser = {
-
-      name: user.name || "User",
-
-      email: user.email,
-
-      picture: user.picture || "",
-
-      googleCredential: response.credential
-
-    };
-
-
-    /* Save login for current browser session */
-
-    sessionStorage.setItem(
-      "request_user",
-      JSON.stringify({
-        name: currentUser.name,
-        email: currentUser.email,
-        picture: currentUser.picture
-      })
+    console.error(
+      "Google initialization failed:",
+      error
     );
 
-
-    updateUserUI();
-
-    showToast(
-      `Welcome, ${currentUser.name.split(" ")[0]}!`
-    );
-
-
-    setTimeout(() => {
-
-      showPaymentPage();
-
-    }, 500);
-
-  } catch (error) {
-
-    console.error("Google login error:", error);
-
-    showToast("Google Login failed. Please try again.");
-
   }
 
 }
 
 
-/* ================= DECODE GOOGLE JWT ================= */
-
-function decodeGoogleJWT(token) {
-
-  const parts = token.split(".");
-
-  if (parts.length !== 3) {
-    throw new Error("Invalid Google token.");
-  }
-
-  const base64Url = parts[1];
-
-  const base64 = base64Url
-    .replace(/-/g, "+")
-    .replace(/_/g, "/");
-
-  const padded =
-    base64 +
-    "=".repeat((4 - (base64.length % 4)) % 4);
-
-  const binary = atob(padded);
-
-  const bytes = new Uint8Array(binary.length);
-
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-
-  const decoder = new TextDecoder("utf-8");
-
-  return JSON.parse(decoder.decode(bytes));
-
-}
-
-
-/* ================= USER UI ================= */
-
-function updateUserUI() {
-
-  if (!currentUser) return;
-
-
-  const nameElements =
-    document.querySelectorAll("[data-user-name]");
-
-  nameElements.forEach((el) => {
-    el.textContent = currentUser.name;
-  });
-
-
-  const emailElements =
-    document.querySelectorAll("[data-user-email]");
-
-  emailElements.forEach((el) => {
-    el.textContent = currentUser.email;
-  });
-
-
-  const avatarElements =
-    document.querySelectorAll("[data-user-avatar]");
-
-  avatarElements.forEach((el) => {
-
-    if (currentUser.picture) {
-
-      el.innerHTML = `
-        <img
-          src="${currentUser.picture}"
-          alt="Profile"
-          style="width:100%;height:100%;object-fit:cover;border-radius:50%;"
-        >
-      `;
-
-    } else {
-
-      el.textContent =
-        currentUser.name.charAt(0).toUpperCase();
-
-    }
-
-  });
-
-}
-
-
-/* =========================================================
-   RAZORPAY PAYMENT
-   ========================================================= */
-
-async function startPayment() {
-
-  if (paymentInProgress) {
-    return;
-  }
-
-
-  if (!currentUser) {
-
-    showToast("Please login with Google first.");
-    showLoginPage();
-
-    return;
-
-  }
-
+function handleFallbackGoogleClick() {
 
   if (
-    typeof Razorpay === "undefined"
+    window.google &&
+    google.accounts &&
+    google.accounts.id
+  ) {
+
+    google.accounts.id.prompt();
+
+    return;
+
+  }
+
+  showToast(
+    "Google login is still loading. Please try again."
+  );
+
+}
+
+
+function handleGoogleCredential(response) {
+
+  if (
+    !response ||
+    !response.credential
   ) {
 
     showToast(
-      "Payment system load nahi hua. Page refresh karein."
+      "Google login failed."
     );
 
     return;
 
   }
 
-
-  paymentInProgress = true;
-
-  showLoading("Creating payment...");
-
-
   try {
 
-    /*
-      IMPORTANT:
+    const user =
+      parseJwt(response.credential);
 
-      ₹45 ka Razorpay Order BACKEND par create hoga.
+    currentUser = {
 
-      Frontend directly trusted payment amount/order
-      create nahi karega.
-    */
+      googleId:
+        user.sub || "",
 
-    const orderResponse = await fetch(
-      "/api/create-order",
-      {
-        method: "POST",
+      email:
+        user.email || "",
 
-        headers: {
-          "Content-Type": "application/json"
-        },
+      name:
+        user.name ||
+        user.given_name ||
+        "User",
 
-        body: JSON.stringify({
+      picture:
+        user.picture || ""
 
-          amount: PAYMENT_AMOUNT,
+    };
 
-          user: {
-            name: currentUser.name,
-
-            email: currentUser.email
-          }
-
-        })
-      }
+    localStorage.setItem(
+      STORAGE_USER,
+      JSON.stringify(currentUser)
     );
 
-
-    if (!orderResponse.ok) {
-
-      throw new Error(
-        "Unable to create payment order."
-      );
-
-    }
-
-
-    const order = await orderResponse.json();
-
-
-    if (!order.order_id) {
-
-      throw new Error(
-        "Backend did not return Razorpay order ID."
-      );
-
-    }
-
-
-    hideLoading();
-
-
-    openRazorpayCheckout(order);
-
+    startProfileFlow();
 
   } catch (error) {
 
-    console.error("Create order error:", error);
-
-    hideLoading();
-
-    paymentInProgress = false;
+    console.error(error);
 
     showToast(
-      "Payment start nahi ho paya. Please try again."
+      "Unable to read Google account."
     );
 
   }
@@ -437,563 +372,1133 @@ async function startPayment() {
 
 
 /* =========================================================
-   RAZORPAY CHECKOUT
-   ========================================================= */
+   JWT PARSER
+========================================================= */
 
-function openRazorpayCheckout(order) {
+function parseJwt(token) {
 
-  const options = {
+  const base64Url =
+    token.split(".")[1];
 
-    key: RAZORPAY_KEY_ID,
+  const base64 =
+    base64Url
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
 
-    order_id: order.order_id,
-
-    amount: order.amount || 4500,
-
-    currency: order.currency || "INR",
-
-    name: "Your Request",
-
-    description: "Request Processing Fee",
-
-    image: "",
-
-
-    prefill: {
-
-      name: currentUser?.name || "",
-
-      email: currentUser?.email || ""
-
-    },
-
-
-    notes: {
-
-      user_email: currentUser?.email || "",
-
-      user_name: currentUser?.name || ""
-
-    },
-
-
-    theme: {
-
-      color: "#2563eb"
-
-    },
-
-
-    handler: async function (response) {
-
-      await verifyPayment(response);
-
-    },
-
-
-    modal: {
-
-      ondismiss: function () {
-
-        paymentInProgress = false;
-
-        showToast("Payment cancelled.");
-
-      }
-
-    }
-
-  };
-
-
-  try {
-
-    const razorpay =
-      new Razorpay(options);
-
-
-    razorpay.on(
-      "payment.failed",
-      function (response) {
-
-        console.error(
-          "Payment failed:",
-          response
-        );
-
-        paymentInProgress = false;
-
-        showToast(
-          "Payment failed. Please try again."
-        );
-
-      }
+  const jsonPayload =
+    decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map(
+          character =>
+            "%" +
+            (
+              "00" +
+              character
+                .charCodeAt(0)
+                .toString(16)
+            ).slice(-2)
+        )
+        .join("")
     );
 
-
-    razorpay.open();
-
-
-  } catch (error) {
-
-    console.error(
-      "Razorpay checkout error:",
-      error
-    );
-
-    paymentInProgress = false;
-
-    showToast(
-      "Unable to open payment window."
-    );
-
-  }
+  return JSON.parse(jsonPayload);
 
 }
 
 
 /* =========================================================
-   PAYMENT VERIFICATION
-   ========================================================= */
+   PROFILE FLOW
+========================================================= */
 
-async function verifyPayment(paymentResponse) {
+function startProfileFlow() {
 
-  showLoading("Verifying payment...");
+  const savedProfile =
+    getSavedProfile();
 
+  if (
+    savedProfile &&
+    currentUser &&
+    savedProfile.email === currentUser.email
+  ) {
 
-  try {
+    profileAnswers =
+      savedProfile.answers || profileAnswers;
 
-    const verifyResponse = await fetch(
-      "/api/verify-payment",
-      {
-        method: "POST",
+    ageVerified =
+      true;
 
-        headers: {
-          "Content-Type": "application/json"
-        },
+    openDatingHome();
 
-        body: JSON.stringify({
-
-          razorpay_order_id:
-            paymentResponse.razorpay_order_id,
-
-          razorpay_payment_id:
-            paymentResponse.razorpay_payment_id,
-
-          razorpay_signature:
-            paymentResponse.razorpay_signature,
-
-          user: {
-
-            name:
-              currentUser?.name || "",
-
-            email:
-              currentUser?.email || ""
-
-          }
-
-        })
-      }
-    );
-
-
-    const result =
-      await verifyResponse.json();
-
-
-    if (
-      !verifyResponse.ok ||
-      !result.success
-    ) {
-
-      throw new Error(
-        result.message ||
-        "Payment verification failed."
-      );
-
-    }
-
-
-    /*
-      PAYMENT VERIFIED SUCCESSFULLY
-    */
-
-    paymentInProgress = false;
-
-    hideLoading();
-
-    savePaymentLocally(paymentResponse);
-
-    showSuccessPage();
-
-  } catch (error) {
-
-    console.error(
-      "Payment verification error:",
-      error
-    );
-
-    paymentInProgress = false;
-
-    hideLoading();
-
-    showToast(
-      "Payment verify nahi ho paya. Support se contact karein."
-    );
+    return;
 
   }
+
+  showScreen("age-screen");
 
 }
 
 
 /* =========================================================
-   SAVE PAYMENT STATUS
-   ========================================================= */
+   AGE VERIFICATION
+========================================================= */
 
-function savePaymentLocally(paymentResponse) {
+function verifyAge() {
 
-  const paymentData = {
+  const input =
+    document.getElementById("dob-input");
 
-    paymentId:
-      paymentResponse.razorpay_payment_id,
+  if (!input || !input.value) {
 
-    orderId:
-      paymentResponse.razorpay_order_id,
+    showToast(
+      "Please select your date of birth."
+    );
 
-    email:
-      currentUser?.email || "",
+    return;
 
-    name:
-      currentUser?.name || "",
+  }
 
-    amount: PAYMENT_AMOUNT,
+  const birthDate =
+    new Date(input.value);
 
-    date:
-      new Date().toISOString()
+  if (
+    Number.isNaN(
+      birthDate.getTime()
+    )
+  ) {
 
-  };
+    showToast(
+      "Please enter a valid date."
+    );
 
+    return;
 
-  sessionStorage.setItem(
-    "request_payment",
-    JSON.stringify(paymentData)
+  }
+
+  const today =
+    new Date();
+
+  let age =
+    today.getFullYear() -
+    birthDate.getFullYear();
+
+  const monthDifference =
+    today.getMonth() -
+    birthDate.getMonth();
+
+  if (
+    monthDifference < 0 ||
+    (
+      monthDifference === 0 &&
+      today.getDate() <
+      birthDate.getDate()
+    )
+  ) {
+
+    age--;
+
+  }
+
+  if (age < 18) {
+
+    showToast(
+      "You must be 18 or older to use LUMA."
+    );
+
+    return;
+
+  }
+
+  ageVerified = true;
+
+  currentQuestion = 0;
+
+  renderQuestion();
+
+  showScreen(
+    "questions-screen"
   );
 
 }
 
 
 /* =========================================================
-   SESSION RESTORE
-   ========================================================= */
+   QUESTION RENDERING
+========================================================= */
 
-function restoreSession() {
+function renderQuestion() {
+
+  const question =
+    questions[currentQuestion];
+
+  if (!question) {
+
+    showPaymentScreen();
+
+    return;
+
+  }
+
+  const title =
+    document.getElementById(
+      "question-title"
+    );
+
+  const description =
+    document.getElementById(
+      "question-description"
+    );
+
+  const eyebrow =
+    document.getElementById(
+      "question-eyebrow"
+    );
+
+  const icon =
+    document.getElementById(
+      "question-icon"
+    );
+
+  const content =
+    document.getElementById(
+      "question-content"
+    );
+
+  const counter =
+    document.getElementById(
+      "question-counter"
+    );
+
+  const progress =
+    document.getElementById(
+      "question-progress"
+    );
+
+  title.textContent =
+    question.title;
+
+  description.textContent =
+    question.description;
+
+  eyebrow.textContent =
+    question.eyebrow;
+
+  icon.innerHTML =
+    question.icon;
+
+  counter.textContent =
+    `${String(currentQuestion + 1).padStart(2, "0")} / ${String(questions.length).padStart(2, "0")}`;
+
+  progress.style.width =
+    `${((currentQuestion + 1) / questions.length) * 100}%`;
+
+
+  if (question.type === "text") {
+
+    content.innerHTML = `
+
+      <label class="field-label">
+        ${escapeHtml(question.key === "city" ? "Your city" : "Your name")}
+      </label>
+
+      <input
+        id="question-input"
+        class="question-input"
+        type="text"
+        placeholder="${escapeHtml(question.placeholder)}"
+        value="${escapeHtml(profileAnswers[question.key] || "")}"
+        autocomplete="off"
+      />
+
+    `;
+
+  }
+
+
+  if (question.type === "textarea") {
+
+    content.innerHTML = `
+
+      <textarea
+        id="question-input"
+        class="question-input"
+        placeholder="${escapeHtml(question.placeholder)}"
+        maxlength="300"
+      >${escapeHtml(profileAnswers[question.key] || "")}</textarea>
+
+    `;
+
+  }
+
+
+  if (question.type === "options") {
+
+    const selected =
+      profileAnswers[question.key];
+
+    content.innerHTML = `
+
+      <div class="option-grid">
+
+        ${question.options.map(option => `
+
+          <button
+            type="button"
+            class="option-btn ${
+              selected === option
+                ? "selected"
+                : ""
+            }"
+            onclick="selectOption('${escapeAttribute(option)}')"
+          >
+            ${escapeHtml(option)}
+          </button>
+
+        `).join("")}
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+
+/* =========================================================
+   OPTION SELECT
+========================================================= */
+
+function selectOption(value) {
+
+  const question =
+    questions[currentQuestion];
+
+  profileAnswers[
+    question.key
+  ] = value;
+
+  renderQuestion();
+
+}
+
+
+/* =========================================================
+   NEXT QUESTION
+========================================================= */
+
+function nextQuestion() {
+
+  const question =
+    questions[currentQuestion];
+
+  if (
+    question.type === "text" ||
+    question.type === "textarea"
+  ) {
+
+    const input =
+      document.getElementById(
+        "question-input"
+      );
+
+    const value =
+      input
+        ? input.value.trim()
+        : "";
+
+    if (!value) {
+
+      showToast(
+        "Please answer this question."
+      );
+
+      input?.focus();
+
+      return;
+
+    }
+
+    profileAnswers[
+      question.key
+    ] = value;
+
+  }
+
+  if (
+    question.type === "options" &&
+    !profileAnswers[question.key]
+  ) {
+
+    showToast(
+      "Please choose an option."
+    );
+
+    return;
+
+  }
+
+
+  if (
+    currentQuestion <
+    questions.length - 1
+  ) {
+
+    currentQuestion++;
+
+    renderQuestion();
+
+    return;
+
+  }
+
+
+  showPaymentScreen();
+
+}
+
+
+/* =========================================================
+   PREVIOUS QUESTION
+========================================================= */
+
+function previousQuestion() {
+
+  if (currentQuestion <= 0) {
+
+    showScreen("age-screen");
+
+    return;
+
+  }
+
+  currentQuestion--;
+
+  renderQuestion();
+
+}
+
+
+/* =========================================================
+   PAYMENT SCREEN
+========================================================= */
+
+function showPaymentScreen() {
+
+  showScreen(
+    "payment-screen"
+  );
+
+}
+
+
+/* =========================================================
+   RAZORPAY PAYMENT LINK
+========================================================= */
+
+function startPayment() {
+
+  window.open(
+    PAYMENT_LINK,
+    "_blank",
+    "noopener,noreferrer"
+  );
+
+  showToast(
+    "Razorpay payment page opened."
+  );
+
+}
+
+
+/* =========================================================
+   PAYMENT COMPLETE
+========================================================= */
+
+function confirmPaymentCompleted() {
+
+  const confirmed =
+    window.confirm(
+      "Have you completed the ₹45 Razorpay payment?"
+    );
+
+  if (!confirmed) {
+
+    return;
+
+  }
+
+  /*
+    IMPORTANT:
+    This frontend-only version cannot securely verify
+    the Razorpay transaction.
+
+    We store the status as self_reported rather than
+    pretending it was server-verified.
+  */
+
+  createDatingProfile();
+
+}
+
+
+/* =========================================================
+   CREATE PROFILE
+========================================================= */
+
+function createDatingProfile() {
+
+  if (!currentUser) {
+
+    showToast(
+      "Please login again."
+    );
+
+    showScreen("login-gate");
+
+    return;
+
+  }
+
+  const profile = {
+
+    email:
+      currentUser.email,
+
+    googleId:
+      currentUser.googleId,
+
+    name:
+      profileAnswers.name,
+
+    picture:
+      currentUser.picture || "",
+
+    answers:
+      { ...profileAnswers },
+
+    ageVerified:
+      true,
+
+    paymentStatus:
+      "self_reported",
+
+    paymentVerified:
+      false,
+
+    createdAt:
+      new Date().toISOString()
+
+  };
+
+
+  localStorage.setItem(
+    STORAGE_PROFILE,
+    JSON.stringify(profile)
+  );
+
+
+  showScreen(
+    "profile-created-screen"
+  );
+
+}
+
+
+/* =========================================================
+   OPEN DATING HOME
+========================================================= */
+
+function openDatingHome() {
+
+  renderDatingProfiles();
+
+  showScreen(
+    "dating-home"
+  );
+
+}
+
+
+function showDatingHome() {
+
+  showScreen(
+    "dating-home"
+  );
+
+}
+
+
+/* =========================================================
+   DISCOVERY PROFILES
+========================================================= */
+
+function renderDatingProfiles() {
+
+  const feed =
+    document.getElementById(
+      "profile-feed"
+    );
+
+  if (!feed) {
+
+    return;
+
+  }
+
+  if (
+    currentDiscoveryIndex >=
+    discoveryProfiles.length
+  ) {
+
+    currentDiscoveryIndex = 0;
+
+  }
+
+  const profile =
+    discoveryProfiles[
+      currentDiscoveryIndex
+    ];
+
+
+  feed.innerHTML = `
+
+    <article class="discovery-card">
+
+      <div class="profile-photo ${profile.colorClass}">
+
+        <span class="profile-tag">
+          ${escapeHtml(profile.tag)}
+        </span>
+
+        <div class="profile-avatar">
+          ${escapeHtml(profile.initials)}
+        </div>
+
+        <div class="profile-gradient"></div>
+
+        <div class="profile-info">
+
+          <h3 class="profile-name">
+
+            ${escapeHtml(profile.name)},
+            ${profile.age}
+
+            <span class="verified-badge">
+              <i class="fa-solid fa-check"></i>
+            </span>
+
+          </h3>
+
+          <div class="profile-meta">
+
+            <span>
+              <i class="fa-solid fa-location-dot"></i>
+              ${escapeHtml(profile.city)}
+            </span>
+
+            <span>
+              <i class="fa-solid fa-circle"></i>
+              Active recently
+            </span>
+
+          </div>
+
+          <p class="profile-bio">
+            ${escapeHtml(profile.bio)}
+          </p>
+
+        </div>
+
+      </div>
+
+    </article>
+
+  `;
+
+}
+
+
+/* =========================================================
+   DISCOVERY ACTIONS
+========================================================= */
+
+function handleDiscoveryAction(action) {
+
+  const profile =
+    discoveryProfiles[
+      currentDiscoveryIndex
+    ];
+
+  if (!profile) {
+
+    return;
+
+  }
+
+  if (action === "like") {
+
+    showToast(
+      `You liked ${profile.name} ❤️`
+    );
+
+  }
+
+  if (action === "super") {
+
+    showToast(
+      `Super liked ${profile.name} ⭐`
+    );
+
+  }
+
+  if (action === "pass") {
+
+    showToast(
+      `Passed on ${profile.name}`
+    );
+
+  }
+
+
+  currentDiscoveryIndex++;
+
+  renderDatingProfiles();
+
+}
+
+
+/* =========================================================
+   MY PROFILE
+========================================================= */
+
+function showMyProfile() {
+
+  const profile =
+    getSavedProfile();
+
+  if (!profile) {
+
+    showToast(
+      "Your profile isn't ready yet."
+    );
+
+    return;
+
+  }
+
+  renderMyProfile(
+    profile
+  );
+
+  showScreen(
+    "my-profile-screen"
+  );
+
+}
+
+
+function renderMyProfile(profile) {
+
+  const hero =
+    document.getElementById(
+      "my-profile-hero"
+    );
+
+  const details =
+    document.getElementById(
+      "my-profile-details"
+    );
+
+  if (!hero || !details) {
+
+    return;
+
+  }
+
+
+  const name =
+    profile.answers?.name ||
+    profile.name ||
+    "You";
+
+  const gender =
+    profile.answers?.gender ||
+    "Not specified";
+
+  const lookingFor =
+    profile.answers?.lookingFor ||
+    "Not specified";
+
+  const city =
+    profile.answers?.city ||
+    "Not specified";
+
+  const bio =
+    profile.answers?.bio ||
+    "No bio added yet.";
+
+
+  const initial =
+    name
+      .charAt(0)
+      .toUpperCase();
+
+
+  hero.innerHTML = `
+
+    <div class="my-avatar">
+      ${escapeHtml(initial)}
+    </div>
+
+    <div>
+
+      <h2>
+        ${escapeHtml(name)}
+      </h2>
+
+      <p>
+        <i class="fa-solid fa-location-dot"></i>
+        ${escapeHtml(city)}
+      </p>
+
+    </div>
+
+  `;
+
+
+  details.innerHTML = `
+
+    <div class="detail-card">
+
+      <small>About me</small>
+
+      <p>
+        ${escapeHtml(bio)}
+      </p>
+
+    </div>
+
+
+    <div class="detail-card">
+
+      <small>Gender</small>
+
+      <strong>
+        ${escapeHtml(gender)}
+      </strong>
+
+    </div>
+
+
+    <div class="detail-card">
+
+      <small>Looking for</small>
+
+      <strong>
+        ${escapeHtml(lookingFor)}
+      </strong>
+
+    </div>
+
+
+    <div class="detail-card">
+
+      <small>Profile status</small>
+
+      <strong>
+        <i
+          class="fa-solid fa-circle-check"
+          style="color:#1e4934"
+        ></i>
+        Active
+      </strong>
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   EDIT PROFILE
+========================================================= */
+
+function editProfile() {
+
+  showToast(
+    "Profile editing is coming soon."
+  );
+
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+function logoutUser() {
+
+  const confirmed =
+    window.confirm(
+      "Are you sure you want to sign out?"
+    );
+
+  if (!confirmed) {
+
+    return;
+
+  }
+
+  localStorage.removeItem(
+    STORAGE_USER
+  );
+
+  localStorage.removeItem(
+    STORAGE_PROFILE
+  );
+
+  currentUser = null;
+
+  profileAnswers = {
+    name: "",
+    gender: "",
+    lookingFor: "",
+    city: "",
+    bio: ""
+  };
+
+  ageVerified = false;
+
+  currentQuestion = 0;
+
+  if (
+    window.google &&
+    google.accounts &&
+    google.accounts.id
+  ) {
+
+    try {
+
+      google.accounts.id.disableAutoSelect();
+
+    } catch (error) {
+
+      console.warn(error);
+
+    }
+
+  }
+
+  showScreen(
+    "login-gate"
+  );
+
+}
+
+
+/* =========================================================
+   LOAD SAVED PROFILE
+========================================================= */
+
+function loadSavedProfile() {
 
   try {
 
     const savedUser =
-      sessionStorage.getItem("request_user");
-
-    const savedPayment =
-      sessionStorage.getItem("request_payment");
-
+      localStorage.getItem(
+        STORAGE_USER
+      );
 
     if (savedUser) {
 
       currentUser =
         JSON.parse(savedUser);
 
-      updateUserUI();
-
     }
-
-
-    /*
-      Agar payment already verified hai,
-      refresh ke baad success page dikhao.
-    */
-
-    if (savedUser && savedPayment) {
-
-      showSuccessPage();
-
-      return;
-
-    }
-
-
-    if (savedUser) {
-
-      showPaymentPage();
-
-      return;
-
-    }
-
-
-    showLoginPage();
 
   } catch (error) {
 
     console.error(
-      "Session restore error:",
+      "User load failed:",
       error
     );
 
-    sessionStorage.clear();
-
-    showLoginPage();
-
   }
 
-}
 
-
-/* =========================================================
-   SIGN OUT
-   ========================================================= */
-
-function signOut() {
-
-  currentUser = null;
-
-  sessionStorage.removeItem("request_user");
-  sessionStorage.removeItem("request_payment");
-
+  const profile =
+    getSavedProfile();
 
   if (
-    typeof google !== "undefined" &&
-    google.accounts &&
-    google.accounts.id
+    profile &&
+    currentUser &&
+    profile.email === currentUser.email
   ) {
 
-    google.accounts.id.disableAutoSelect();
+    profileAnswers =
+      profile.answers || profileAnswers;
+
+    ageVerified =
+      true;
 
   }
-
-
-  showLoginPage();
-
-  showToast("Signed out.");
 
 }
 
 
 /* =========================================================
-   TERMS / PRIVACY MODALS
-   ========================================================= */
+   GET PROFILE
+========================================================= */
 
-function openModal(id) {
+function getSavedProfile() {
 
-  const modal =
-    document.getElementById(id);
+  try {
 
-  if (modal) {
-
-    modal.classList.add("active");
-
-  }
-
-}
-
-
-function closeModal(id) {
-
-  const modal =
-    document.getElementById(id);
-
-  if (modal) {
-
-    modal.classList.remove("active");
-
-  }
-
-}
-
-
-function closeAllModals() {
-
-  document
-    .querySelectorAll(".modal")
-    .forEach((modal) => {
-
-      modal.classList.remove("active");
-
-    });
-
-}
-
-
-/* Close modal when clicking outside */
-
-document.addEventListener(
-  "click",
-  function (event) {
-
-    if (
-      event.target.classList.contains("modal")
-    ) {
-
-      event.target.classList.remove(
-        "active"
+    const raw =
+      localStorage.getItem(
+        STORAGE_PROFILE
       );
+
+    if (!raw) {
+
+      return null;
 
     }
 
+    return JSON.parse(raw);
+
+  } catch (error) {
+
+    console.error(
+      "Profile load failed:",
+      error
+    );
+
+    return null;
+
   }
-);
+
+}
 
 
 /* =========================================================
-   BUTTON EVENT FALLBACKS
-   ========================================================= */
+   TOAST
+========================================================= */
 
-document.addEventListener(
-  "DOMContentLoaded",
-  function () {
+let toastTimer = null;
 
-    /* Google Login */
+function showToast(message) {
 
-    const googleButton =
-      document.getElementById(
-        "google-login-button"
-      );
+  const toast =
+    document.getElementById(
+      "toast"
+    );
 
+  const toastMessage =
+    document.getElementById(
+      "toast-message"
+    );
 
-    /* Payment */
+  if (!toast || !toastMessage) {
 
-    const payButton =
-      document.getElementById(
-        "pay-button"
-      );
+    return;
 
-    if (payButton) {
+  }
 
-      payButton.addEventListener(
-        "click",
-        startPayment
-      );
+  toastMessage.textContent =
+    message;
 
-    }
+  toast.classList.add(
+    "show"
+  );
 
+  clearTimeout(
+    toastTimer
+  );
 
-    /* Terms */
+  toastTimer =
+    setTimeout(
+      () => {
 
-    const termsButton =
-      document.getElementById(
-        "terms-button"
-      );
-
-    if (termsButton) {
-
-      termsButton.addEventListener(
-        "click",
-        () => openModal("terms-modal")
-      );
-
-    }
-
-
-    /* Privacy */
-
-    const privacyButton =
-      document.getElementById(
-        "privacy-button"
-      );
-
-    if (privacyButton) {
-
-      privacyButton.addEventListener(
-        "click",
-        () => openModal("privacy-modal")
-      );
-
-    }
-
-
-    /* Close buttons */
-
-    document
-      .querySelectorAll("[data-close-modal]")
-      .forEach((button) => {
-
-        button.addEventListener(
-          "click",
-          () => {
-
-            closeModal(
-              button.dataset.closeModal
-            );
-
-          }
+        toast.classList.remove(
+          "show"
         );
 
-      });
+      },
+      2600
+    );
+
+}
 
 
-    /*
-      Google library kabhi-kabhi DOMContentLoaded
-      ke baad load hoti hai, isliye thoda wait.
-    */
+/* =========================================================
+   HTML ESCAPING
+========================================================= */
 
-    let attempts = 0;
+function escapeHtml(value) {
 
-    const googleTimer =
-      setInterval(() => {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 
-        attempts++;
-
-        if (
-          typeof google !== "undefined" &&
-          google.accounts &&
-          google.accounts.id
-        ) {
-
-          clearInterval(googleTimer);
-
-          initGoogleLogin();
-
-        }
+}
 
 
-        if (attempts >= 30) {
+function escapeAttribute(value) {
 
-          clearInterval(googleTimer);
-
-          console.error(
-            "Google Identity Services timeout."
-          );
-
-        }
-
-      }, 300);
-
-
-    restoreSession();
-
-  }
-);
+  return String(value ?? "")
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "\\'");
+}
 
 
 /* =========================================================
    GLOBAL FUNCTIONS
-   HTML onclick="" ke liye
-   ========================================================= */
+========================================================= */
+
+window.handleFallbackGoogleClick =
+  handleFallbackGoogleClick;
+
+window.verifyAge =
+  verifyAge;
+
+window.nextQuestion =
+  nextQuestion;
+
+window.previousQuestion =
+  previousQuestion;
+
+window.selectOption =
+  selectOption;
 
 window.startPayment =
   startPayment;
 
-window.handleGoogleLogin =
-  handleGoogleLogin;
+window.confirmPaymentCompleted =
+  confirmPaymentCompleted;
 
-window.signOut =
-  signOut;
+window.openDatingHome =
+  openDatingHome;
 
-window.openModal =
-  openModal;
+window.showDatingHome =
+  showDatingHome;
 
-window.closeModal =
-  closeModal;
+window.showMyProfile =
+  showMyProfile;
 
-window.closeAllModals =
-  closeAllModals;
+window.handleDiscoveryAction =
+  handleDiscoveryAction;
+
+window.editProfile =
+  editProfile;
+
+window.logoutUser =
+  logoutUser;
+
+window.showToast =
+  showToast;
