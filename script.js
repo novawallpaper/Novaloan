@@ -1,7 +1,5 @@
 /* =========================================================
-   DATING APP - COMPLETE SCRIPT
-   Google Login + Age Verification + Profile Questions
-   + Razorpay Payment Link
+   HEARTLY - COMPLETE JAVASCRIPT
    ========================================================= */
 
 
@@ -12,8 +10,10 @@
 const GOOGLE_CLIENT_ID =
   "452456583028-1l86bibq60ggkl3o1h5j88sed7v04eof.apps.googleusercontent.com";
 
+
 const RAZORPAY_PAYMENT_LINK =
   "https://rzp.io/rzp/EDfHHkBO";
+
 
 const PROFILE_PRICE = 45;
 
@@ -32,146 +32,206 @@ let ageVerified = false;
 
 let googleInitialized = false;
 
-let googleInitializing = false;
-
 
 /* =========================================================
    QUESTIONS
    ========================================================= */
 
 const profileQuestions = [
+
   {
     id: "name",
+
     title: "What's your name?",
-    subtitle: "Tell us what you'd like people to call you.",
+
+    subtitle:
+      "Tell us what you'd like people to call you.",
+
     type: "text",
-    placeholder: "Enter your name"
+
+    placeholder:
+      "Enter your name"
   },
+
 
   {
     id: "gender",
+
     title: "What's your gender?",
-    subtitle: "Choose the option that best describes you.",
+
+    subtitle:
+      "Choose the option that best describes you.",
+
     type: "options",
+
     options: [
       "Male",
       "Female"
     ]
   },
+
 
   {
     id: "lookingFor",
+
     title: "Who are you looking for?",
-    subtitle: "Choose who you'd like to meet.",
+
+    subtitle:
+      "Choose who you'd like to meet.",
+
     type: "options",
+
     options: [
       "Male",
       "Female"
     ]
   },
 
+
   {
     id: "city",
+
     title: "Where are you from?",
-    subtitle: "Your city helps us show relevant profiles.",
+
+    subtitle:
+      "Your city helps us show relevant profiles.",
+
     type: "text",
-    placeholder: "Enter your city"
+
+    placeholder:
+      "Enter your city"
   },
+
 
   {
     id: "bio",
+
     title: "Tell us about yourself",
-    subtitle: "Write something interesting about you.",
+
+    subtitle:
+      "Write something interesting about you.",
+
     type: "textarea",
-    placeholder: "A little about me..."
+
+    placeholder:
+      "A little about me..."
   }
+
 ];
 
 
 /* =========================================================
-   DOM HELPERS
+   HELPERS
    ========================================================= */
 
-function getElement(...ids) {
-  for (const id of ids) {
-    const element = document.getElementById(id);
+function $(id) {
 
-    if (element) {
-      return element;
-    }
-  }
+  return document.getElementById(id);
 
-  return null;
 }
 
 
-function showToast(message, type = "normal") {
-  const toast = getElement("toast");
+function showToast(
+  message,
+  type = ""
+) {
+
+  const toast = $("toast");
 
   if (!toast) {
+
     console.log(message);
+
     return;
   }
+
 
   toast.textContent = message;
 
-  toast.className = "toast";
+  toast.className =
+    "toast show";
 
-  if (type === "success") {
-    toast.classList.add("success");
+
+  if (type) {
+
+    toast.classList.add(type);
+
   }
 
-  if (type === "error") {
-    toast.classList.add("error");
-  }
 
-  toast.classList.add("show");
+  clearTimeout(
+    window.toastTimer
+  );
 
-  clearTimeout(window.__toastTimer);
 
-  window.__toastTimer = setTimeout(() => {
-    toast.classList.remove("show");
-  }, 3000);
+  window.toastTimer =
+    setTimeout(() => {
+
+      toast.classList.remove(
+        "show"
+      );
+
+    }, 3000);
 }
 
 
 /* =========================================================
-   SCREEN MANAGEMENT
+   SCREEN
    ========================================================= */
 
-function showScreen(screenId) {
-  const screens = document.querySelectorAll(".screen-content");
+function showScreen(
+  screenId
+) {
 
-  screens.forEach(screen => {
-    screen.classList.remove("active");
-  });
+  document
+    .querySelectorAll(
+      ".screen-content"
+    )
+    .forEach(screen => {
 
-  const target = document.getElementById(screenId);
+      screen.classList.remove(
+        "active"
+      );
 
-  if (target) {
-    target.classList.add("active");
+    });
+
+
+  const screen =
+    $(screenId);
+
+
+  if (screen) {
+
+    screen.classList.add(
+      "active"
+    );
+
   }
+
 }
 
 
 /* =========================================================
-   GOOGLE LOGIN
+   REAL GOOGLE LOGIN
    ========================================================= */
 
 /*
-   Google library is loaded asynchronously.
+   IMPORTANT:
 
-   We therefore don't immediately assume that
-   window.google exists.
+   This does NOT create a fake Google button.
+
+   google.accounts.id.renderButton()
+   creates the official Google Sign-In button.
 */
+
 
 function initializeGoogleLogin() {
 
-  if (googleInitialized || googleInitializing) {
+  if (googleInitialized) {
+
     return;
   }
 
-  googleInitializing = true;
 
   const setupGoogle = () => {
 
@@ -180,49 +240,24 @@ function initializeGoogleLogin() {
       !window.google.accounts ||
       !window.google.accounts.id
     ) {
-      console.error("Google Identity Services is not available.");
 
-      googleInitializing = false;
-
-      const container = getElement(
-        "google-signin",
-        "google-signin-btn"
+      console.error(
+        "Google Identity Services not loaded."
       );
-
-      if (container) {
-        container.innerHTML = `
-          <div style="
-            padding:14px;
-            border:1px solid #e5e7eb;
-            border-radius:12px;
-            background:#fff;
-            color:#666;
-            font-size:14px;
-            text-align:center;
-          ">
-            Google Login is loading...<br>
-            <small>Please refresh the page.</small>
-          </div>
-        `;
-      }
 
       return;
     }
 
 
-    const googleButton = getElement(
-      "google-signin",
-      "google-signin-btn"
-    );
+    const container =
+      $("google-signin");
 
 
-    if (!googleButton) {
+    if (!container) {
 
       console.error(
-        "Google button container not found. Expected #google-signin"
+        "Missing #google-signin"
       );
-
-      googleInitializing = false;
 
       return;
     }
@@ -231,84 +266,92 @@ function initializeGoogleLogin() {
     try {
 
       /*
-         Google initialize should normally be called once.
+         Google initialization
       */
 
       google.accounts.id.initialize({
 
-        client_id: GOOGLE_CLIENT_ID,
+        client_id:
+          GOOGLE_CLIENT_ID,
 
-        callback: handleGoogleCredential,
+        callback:
+          handleGoogleCredential,
 
-        auto_select: false,
+        auto_select:
+          false,
 
-        cancel_on_tap_outside: true
+        cancel_on_tap_outside:
+          true
 
       });
 
 
       /*
-         Clear old button if any.
+         Clear anything old.
       */
 
-      googleButton.innerHTML = "";
+      container.innerHTML = "";
 
 
       /*
-         Render REAL Google button.
+         REAL GOOGLE BUTTON
       */
 
       google.accounts.id.renderButton(
 
-        googleButton,
+        container,
 
         {
-          type: "standard",
 
-          theme: "outline",
+          type:
+            "standard",
 
-          size: "large",
+          theme:
+            "outline",
 
-          text: "signin_with",
+          size:
+            "large",
 
-          shape: "rectangular",
+          text:
+            "signin_with",
 
-          logo_alignment: "left",
+          shape:
+            "rectangular",
 
-          width: 360
+          logo_alignment:
+            "left",
+
+          width:
+            360
 
         }
 
       );
 
 
-      googleInitialized = true;
+      googleInitialized =
+        true;
 
-      googleInitializing = false;
 
       console.log(
-        "Google Sign-In initialized successfully."
+        "Official Google button loaded."
       );
+
 
     } catch (error) {
 
-      googleInitializing = false;
-
       console.error(
-        "Google initialization error:",
+        "Google initialization failed:",
         error
       );
 
-      showToast(
-        "Google Login initialize nahi ho paya.",
-        "error"
-      );
     }
+
   };
 
 
   /*
-     If Google library already loaded.
+     Google library already loaded
   */
 
   if (
@@ -319,24 +362,31 @@ function initializeGoogleLogin() {
 
     setupGoogle();
 
-  } else {
+    return;
+  }
 
-    /*
-       Google officially provides this callback
-       when the library finishes loading.
-    */
 
-    window.onGoogleLibraryLoad = setupGoogle;
+  /*
+     Google library is still loading.
+  */
 
-    /*
-       Extra fallback.
-    */
+  window.onGoogleLibraryLoad =
+    setupGoogle;
 
-    let attempts = 0;
 
-    const checkGoogle = setInterval(() => {
+  /*
+     Additional safety check for
+     async/defer loading.
+  */
+
+  let attempts = 0;
+
+
+  const timer =
+    setInterval(() => {
 
       attempts++;
+
 
       if (
         window.google &&
@@ -344,37 +394,39 @@ function initializeGoogleLogin() {
         window.google.accounts.id
       ) {
 
-        clearInterval(checkGoogle);
+        clearInterval(timer);
 
         setupGoogle();
 
       }
 
+
       if (attempts >= 50) {
 
-        clearInterval(checkGoogle);
+        clearInterval(timer);
 
         if (!googleInitialized) {
 
           console.error(
-            "Google library failed to load."
+            "Google library did not load."
           );
 
-          googleInitializing = false;
         }
 
       }
 
     }, 200);
-  }
+
 }
 
 
 /* =========================================================
-   GOOGLE CREDENTIAL HANDLER
+   GOOGLE CREDENTIAL
    ========================================================= */
 
-function handleGoogleCredential(response) {
+function handleGoogleCredential(
+  response
+) {
 
   try {
 
@@ -384,7 +436,7 @@ function handleGoogleCredential(response) {
     ) {
 
       showToast(
-        "Google login failed. Please try again.",
+        "Google login failed.",
         "error"
       );
 
@@ -392,9 +444,10 @@ function handleGoogleCredential(response) {
     }
 
 
-    const user = parseJwt(
-      response.credential
-    );
+    const user =
+      parseJwt(
+        response.credential
+      );
 
 
     if (
@@ -403,7 +456,7 @@ function handleGoogleCredential(response) {
     ) {
 
       showToast(
-        "Google account information read nahi ho saki.",
+        "Google account information unavailable.",
         "error"
       );
 
@@ -411,32 +464,41 @@ function handleGoogleCredential(response) {
     }
 
 
+    /*
+       Logged-in Google user
+    */
+
     currentUser = {
 
-      id: user.sub,
+      id:
+        user.sub,
 
-      email: user.email,
+      email:
+        user.email,
 
-      name: user.name || "User",
+      name:
+        user.name ||
+        "User",
 
-      picture: user.picture || "",
-
-      givenName:
-        user.given_name || "",
-
-      familyName:
-        user.family_name || ""
+      picture:
+        user.picture ||
+        ""
 
     };
 
 
     /*
-       Save Google user locally.
+       Save login
     */
 
     localStorage.setItem(
+
       "dating_google_user",
-      JSON.stringify(currentUser)
+
+      JSON.stringify(
+        currentUser
+      )
+
     );
 
 
@@ -450,7 +512,7 @@ function handleGoogleCredential(response) {
 
       startProfileFlow();
 
-    }, 400);
+    }, 300);
 
 
   } catch (error) {
@@ -464,67 +526,95 @@ function handleGoogleCredential(response) {
       "Google login failed.",
       "error"
     );
+
   }
+
 }
 
 
 /* =========================================================
-   JWT PARSER
+   JWT
    ========================================================= */
 
-function parseJwt(token) {
+function parseJwt(
+  token
+) {
 
   try {
 
-    const parts = token.split(".");
+    const parts =
+      token.split(".");
 
-    if (parts.length !== 3) {
+
+    if (
+      parts.length !== 3
+    ) {
+
       return null;
+
     }
 
 
-    const base64Url = parts[1];
+    const base64Url =
+      parts[1];
 
-    const base64 = base64Url
-      .replace(/-/g, "+")
-      .replace(/_/g, "/");
+
+    const base64 =
+      base64Url
+        .replace(
+          /-/g,
+          "+"
+        )
+        .replace(
+          /_/g,
+          "/"
+        );
 
 
     const padded =
       base64 +
       "=".repeat(
-        (4 - (base64.length % 4)) % 4
+        (
+          4 -
+          (
+            base64.length % 4
+          )
+        ) % 4
       );
 
 
-    const binary = atob(padded);
+    const jsonPayload =
+      decodeURIComponent(
+
+        atob(padded)
+
+          .split("")
+
+          .map(
+            character => {
+
+              return (
+                "%" +
+                (
+                  "00" +
+                  character
+                    .charCodeAt(0)
+                    .toString(16)
+                ).slice(-2)
+              );
+
+            }
+          )
+
+          .join("")
+
+      );
 
 
-    const bytes = new Uint8Array(
-      binary.length
+    return JSON.parse(
+      jsonPayload
     );
 
-
-    for (
-      let i = 0;
-      i < binary.length;
-      i++
-    ) {
-
-      bytes[i] = binary.charCodeAt(i);
-
-    }
-
-
-    const decoder =
-      new TextDecoder("utf-8");
-
-
-    const jsonPayload =
-      decoder.decode(bytes);
-
-
-    return JSON.parse(jsonPayload);
 
   } catch (error) {
 
@@ -534,12 +624,14 @@ function parseJwt(token) {
     );
 
     return null;
+
   }
+
 }
 
 
 /* =========================================================
-   START PROFILE FLOW
+   START PROFILE
    ========================================================= */
 
 function startProfileFlow() {
@@ -553,7 +645,9 @@ function startProfileFlow() {
 
   if (!currentUser) {
 
-    showScreen("login-gate");
+    showScreen(
+      "login-gate"
+    );
 
     return;
   }
@@ -564,77 +658,59 @@ function startProfileFlow() {
 
 
   /*
-     Existing profile.
+     Existing paid profile
   */
 
   if (
     savedProfile &&
-    savedProfile.email === currentUser.email
+    savedProfile.email ===
+      currentUser.email &&
+    savedProfile.paymentVerified === true
   ) {
 
     profileAnswers =
-      savedProfile.answers || {};
+      savedProfile.answers ||
+      {};
 
     ageVerified =
-      savedProfile.ageVerified === true;
+      savedProfile.ageVerified ===
+      true;
 
 
-    if (
-      savedProfile.paymentVerified === true ||
-      savedProfile.paymentStatus === "paid"
-    ) {
+    showDatingHome();
 
-      showDatingHome();
-
-      return;
-    }
+    return;
   }
 
 
   /*
-     New profile.
+     New profile
   */
 
-  showScreen("age-screen");
+  showScreen(
+    "age-screen"
+  );
+
 }
 
 
 /* =========================================================
-   AGE VERIFICATION
+   AGE
    ========================================================= */
 
 function verifyAge() {
 
-  const dobInput = getElement(
-    "dob",
-    "date-of-birth",
-    "birth-date"
-  );
-
-
-  if (!dobInput) {
-
-    showToast(
-      "Date of birth field nahi mila.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  const dob = new Date(
-    dobInput.value
-  );
+  const input =
+    $("dob");
 
 
   if (
-    !dobInput.value ||
-    isNaN(dob.getTime())
+    !input ||
+    !input.value
   ) {
 
     showToast(
-      "Please apni date of birth select karo.",
+      "Please select your date of birth.",
       "error"
     );
 
@@ -642,7 +718,29 @@ function verifyAge() {
   }
 
 
-  const today = new Date();
+  const dob =
+    new Date(
+      input.value
+    );
+
+
+  if (
+    isNaN(
+      dob.getTime()
+    )
+  ) {
+
+    showToast(
+      "Invalid date.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const today =
+    new Date();
 
 
   let age =
@@ -650,16 +748,17 @@ function verifyAge() {
     dob.getFullYear();
 
 
-  const monthDifference =
+  const month =
     today.getMonth() -
     dob.getMonth();
 
 
   if (
-    monthDifference < 0 ||
+    month < 0 ||
     (
-      monthDifference === 0 &&
-      today.getDate() < dob.getDate()
+      month === 0 &&
+      today.getDate() <
+        dob.getDate()
     )
   ) {
 
@@ -671,7 +770,7 @@ function verifyAge() {
   if (age < 18) {
 
     showToast(
-      "Dating app use karne ke liye 18+ hona zaroori hai.",
+      "You must be 18 or older.",
       "error"
     );
 
@@ -679,28 +778,25 @@ function verifyAge() {
   }
 
 
-  ageVerified = true;
+  ageVerified =
+    true;
 
 
   profileAnswers.dob =
-    dobInput.value;
+    input.value;
 
 
-  showToast(
-    "Age verified.",
-    "success"
+  currentQuestion =
+    0;
+
+
+  renderQuestion();
+
+
+  showScreen(
+    "questions-screen"
   );
 
-
-  setTimeout(() => {
-
-    currentQuestion = 0;
-
-    renderQuestion();
-
-    showScreen("questions-screen");
-
-  }, 500);
 }
 
 
@@ -711,7 +807,9 @@ function verifyAge() {
 function renderQuestion() {
 
   const question =
-    profileQuestions[currentQuestion];
+    profileQuestions[
+      currentQuestion
+    ];
 
 
   if (!question) {
@@ -722,143 +820,97 @@ function renderQuestion() {
   }
 
 
-  const titleElement =
-    getElement(
-      "question-title",
-      "question-text",
-      "question-heading"
-    );
+  $("question-number")
+    .textContent =
+    `${currentQuestion + 1} / ${profileQuestions.length}`;
 
 
-  const subtitleElement =
-    getElement(
-      "question-subtitle",
-      "question-description"
-    );
+  $("progress-fill")
+    .style.width =
+    `${
+      (
+        (
+          currentQuestion + 1
+        ) /
+        profileQuestions.length
+      ) * 100
+    }%`;
+
+
+  $("question-title")
+    .textContent =
+    question.title;
+
+
+  $("question-subtitle")
+    .textContent =
+    question.subtitle;
 
 
   const container =
-    getElement(
-      "question-container",
-      "question-content",
-      "options-container"
-    );
-
-
-  const numberElement =
-    getElement(
-      "question-number",
-      "question-count"
-    );
-
-
-  const progress =
-    getElement(
-      "progress-fill",
-      "question-progress"
-    );
-
-
-  const nextButton =
-    getElement(
-      "next-btn",
-      "question-next-btn"
-    );
-
-
-  if (titleElement) {
-
-    titleElement.textContent =
-      question.title;
-  }
-
-
-  if (subtitleElement) {
-
-    subtitleElement.textContent =
-      question.subtitle || "";
-  }
-
-
-  if (numberElement) {
-
-    numberElement.textContent =
-      `${currentQuestion + 1} / ${profileQuestions.length}`;
-  }
-
-
-  if (progress) {
-
-    const percentage =
-      (
-        (currentQuestion + 1) /
-        profileQuestions.length
-      ) * 100;
-
-
-    progress.style.width =
-      `${percentage}%`;
-  }
-
-
-  if (!container) {
-
-    console.error(
-      "Question container not found."
-    );
-
-    return;
-  }
+    $("question-container");
 
 
   container.innerHTML = "";
 
 
   /*
-     TEXT INPUT
+     TEXT
   */
 
-  if (question.type === "text") {
+  if (
+    question.type ===
+    "text"
+  ) {
 
     const input =
-      document.createElement("input");
+      document.createElement(
+        "input"
+      );
 
 
-    input.type = "text";
+    input.type =
+      "text";
+
 
     input.className =
       "profile-input";
 
+
     input.placeholder =
-      question.placeholder || "";
+      question.placeholder;
+
 
     input.value =
-      profileAnswers[question.id] || "";
-
-
-    input.autocomplete =
-      "off";
+      profileAnswers[
+        question.id
+      ] ||
+      "";
 
 
     input.addEventListener(
       "input",
       () => {
 
-        profileAnswers[question.id] =
+        profileAnswers[
+          question.id
+        ] =
           input.value.trim();
 
       }
     );
 
 
-    container.appendChild(input);
+    container.appendChild(
+      input
+    );
 
 
-    setTimeout(() => {
+    setTimeout(
+      () => input.focus(),
+      100
+    );
 
-      input.focus();
-
-    }, 100);
   }
 
 
@@ -867,30 +919,38 @@ function renderQuestion() {
   */
 
   else if (
-    question.type === "textarea"
+    question.type ===
+    "textarea"
   ) {
 
     const textarea =
-      document.createElement("textarea");
+      document.createElement(
+        "textarea"
+      );
 
 
     textarea.className =
       "profile-textarea";
 
-    textarea.placeholder =
-      question.placeholder || "";
 
-    textarea.rows = 5;
+    textarea.placeholder =
+      question.placeholder;
+
 
     textarea.value =
-      profileAnswers[question.id] || "";
+      profileAnswers[
+        question.id
+      ] ||
+      "";
 
 
     textarea.addEventListener(
       "input",
       () => {
 
-        profileAnswers[question.id] =
+        profileAnswers[
+          question.id
+        ] =
           textarea.value.trim();
 
       }
@@ -902,11 +962,11 @@ function renderQuestion() {
     );
 
 
-    setTimeout(() => {
+    setTimeout(
+      () => textarea.focus(),
+      100
+    );
 
-      textarea.focus();
-
-    }, 100);
   }
 
 
@@ -915,14 +975,17 @@ function renderQuestion() {
   */
 
   else if (
-    question.type === "options"
+    question.type ===
+    "options"
   ) {
 
-    const optionsWrapper =
-      document.createElement("div");
+    const wrapper =
+      document.createElement(
+        "div"
+      );
 
 
-    optionsWrapper.className =
+    wrapper.className =
       "profile-options";
 
 
@@ -930,7 +993,9 @@ function renderQuestion() {
       option => {
 
         const button =
-          document.createElement("button");
+          document.createElement(
+            "button"
+          );
 
 
         button.type =
@@ -954,6 +1019,7 @@ function renderQuestion() {
           button.classList.add(
             "selected"
           );
+
         }
 
 
@@ -961,10 +1027,11 @@ function renderQuestion() {
           "click",
           () => {
 
-            selectOption(
-              question.id,
-              option
-            );
+            profileAnswers[
+              question.id
+            ] =
+              option;
+
 
             renderQuestion();
 
@@ -972,7 +1039,7 @@ function renderQuestion() {
         );
 
 
-        optionsWrapper.appendChild(
+        wrapper.appendChild(
           button
         );
 
@@ -981,91 +1048,52 @@ function renderQuestion() {
 
 
     container.appendChild(
-      optionsWrapper
+      wrapper
     );
+
   }
 
-
-  /*
-     Update next button state.
-  */
-
-  if (nextButton) {
-
-    nextButton.disabled =
-      !hasCurrentAnswer();
-  }
 }
 
 
 /* =========================================================
-   OPTION SELECTION
-   ========================================================= */
-
-function selectOption(
-  questionId,
-  value
-) {
-
-  profileAnswers[
-    questionId
-  ] = value;
-
-
-  showToast(
-    "Selected",
-    "success"
-  );
-}
-
-
-/* =========================================================
-   NEXT QUESTION
+   NEXT
    ========================================================= */
 
 function nextQuestion() {
 
   const question =
-    profileQuestions[currentQuestion];
+    profileQuestions[
+      currentQuestion
+    ];
 
 
-  if (!question) {
-    return;
-  }
-
-
-  /*
-     Save current input.
-  */
-
-  const container =
-    getElement(
-      "question-container",
-      "question-content",
-      "options-container"
+  const input =
+    document.querySelector(
+      "#question-container input, #question-container textarea"
     );
 
 
-  if (container) {
+  if (input) {
 
-    const input =
-      container.querySelector(
-        "input, textarea"
-      );
+    profileAnswers[
+      question.id
+    ] =
+      input.value.trim();
 
-
-    if (input) {
-
-      profileAnswers[
-        question.id
-      ] =
-        input.value.trim();
-
-    }
   }
 
 
-  if (!hasCurrentAnswer()) {
+  const answer =
+    profileAnswers[
+      question.id
+    ];
+
+
+  if (
+    !answer ||
+    !String(answer).trim()
+  ) {
 
     showToast(
       "Please answer this question.",
@@ -1091,34 +1119,7 @@ function nextQuestion() {
 
 
   renderQuestion();
-}
 
-
-/* =========================================================
-   CURRENT ANSWER VALIDATION
-   ========================================================= */
-
-function hasCurrentAnswer() {
-
-  const question =
-    profileQuestions[currentQuestion];
-
-
-  if (!question) {
-    return true;
-  }
-
-
-  const answer =
-    profileAnswers[
-      question.id
-    ];
-
-
-  return Boolean(
-    answer &&
-    String(answer).trim()
-  );
 }
 
 
@@ -1128,49 +1129,29 @@ function hasCurrentAnswer() {
 
 function showPaymentScreen() {
 
+  $("payment-price")
+    .textContent =
+    PROFILE_PRICE;
+
+
   showScreen(
     "payment-screen"
   );
 
-
-  const priceElement =
-    getElement(
-      "payment-price",
-      "price"
-    );
-
-
-  if (priceElement) {
-
-    priceElement.textContent =
-      `₹${PROFILE_PRICE}`;
-  }
 }
 
 
 /* =========================================================
-   RAZORPAY PAYMENT LINK
+   RAZORPAY PAYMENT
    ========================================================= */
-
-/*
-   This uses Razorpay Payment Link.
-
-   No Razorpay checkout key is required here.
-
-   IMPORTANT:
-   Frontend-only site cannot securely verify payment.
-*/
 
 function startPayment() {
 
   if (!currentUser) {
 
-    showToast(
-      "Please login first.",
-      "error"
+    showScreen(
+      "login-gate"
     );
-
-    showScreen("login-gate");
 
     return;
   }
@@ -1178,22 +1159,20 @@ function startPayment() {
 
   if (!ageVerified) {
 
-    showToast(
-      "Age verification required.",
-      "error"
+    showScreen(
+      "age-screen"
     );
-
-    showScreen("age-screen");
 
     return;
   }
 
 
   /*
-     Save profile draft before leaving site.
+     Save profile draft before
+     opening Razorpay.
   */
 
-  const draftProfile = {
+  const draft = {
 
     email:
       currentUser.email,
@@ -1208,77 +1187,50 @@ function startPayment() {
       profileAnswers,
 
     ageVerified:
-      ageVerified,
-
-    paymentStarted:
       true,
 
     paymentStatus:
       "pending",
 
-    paymentAmount:
+    amount:
       PROFILE_PRICE,
 
-    updatedAt:
+    savedAt:
       new Date().toISOString()
 
   };
 
 
   localStorage.setItem(
+
     "dating_profile_draft",
+
     JSON.stringify(
-      draftProfile
+      draft
     )
-  );
 
-
-  localStorage.setItem(
-    "dating_payment_started",
-    "true"
-  );
-
-
-  showToast(
-    "Payment page opening...",
-    "success"
   );
 
 
   /*
-     Open Razorpay Payment Link.
+     Open your Razorpay Payment Link.
   */
 
-  setTimeout(() => {
+  window.location.href =
+    RAZORPAY_PAYMENT_LINK;
 
-    window.location.href =
-      RAZORPAY_PAYMENT_LINK;
-
-  }, 500);
 }
 
 
 /* =========================================================
-   COMPLETE LOCAL PROFILE
+   PROFILE
    ========================================================= */
-
-/*
-   This function can be used after payment return.
-
-   Since this is frontend-only, this is NOT secure
-   payment verification.
-*/
 
 function createDatingProfile(
   paymentData = {}
 ) {
 
   if (!currentUser) {
-
-    showToast(
-      "Please login first.",
-      "error"
-    );
 
     return;
   }
@@ -1294,12 +1246,10 @@ function createDatingProfile(
 
     name:
       profileAnswers.name ||
-      currentUser.name ||
-      "User",
+      currentUser.name,
 
     picture:
-      currentUser.picture ||
-      "",
+      currentUser.picture,
 
     answers:
       {
@@ -1320,21 +1270,20 @@ function createDatingProfile(
       paymentData.paymentId ||
       "",
 
-    paymentAmount:
-      PROFILE_PRICE,
-
     createdAt:
-      new Date().toISOString(),
-
-    updatedAt:
       new Date().toISOString()
 
   };
 
 
   localStorage.setItem(
+
     "dating_profile",
-    JSON.stringify(profile)
+
+    JSON.stringify(
+      profile
+    )
+
   );
 
 
@@ -1347,85 +1296,90 @@ function createDatingProfile(
     "profile-created-screen"
   );
 
-
-  showToast(
-    "Profile saved successfully!",
-    "success"
-  );
 }
 
 
 /* =========================================================
-   LOAD SAVED PROFILE
+   SAVED PROFILE
    ========================================================= */
 
 function getSavedProfile() {
 
   try {
 
-    const data =
+    const saved =
       localStorage.getItem(
         "dating_profile"
       );
 
 
-    if (!data) {
+    if (!saved) {
+
       return null;
+
     }
 
 
-    return JSON.parse(data);
+    return JSON.parse(
+      saved
+    );
+
 
   } catch (error) {
 
     console.error(
-      "Profile read error:",
       error
     );
 
     return null;
+
   }
+
 }
 
+
+/* =========================================================
+   LOAD SAVED LOGIN
+   ========================================================= */
 
 function loadSavedProfile() {
 
   try {
 
-    const googleUser =
+    const user =
       localStorage.getItem(
         "dating_google_user"
       );
 
 
-    if (googleUser) {
+    if (user) {
 
       currentUser =
         JSON.parse(
-          googleUser
+          user
         );
 
     }
 
 
-    const savedProfile =
+    const profile =
       getSavedProfile();
 
 
     if (
-      savedProfile &&
-      savedProfile.answers
+      profile &&
+      profile.answers
     ) {
 
       profileAnswers =
-        savedProfile.answers;
+        profile.answers;
 
     }
 
 
     if (
-      savedProfile &&
-      savedProfile.ageVerified
+      profile &&
+      profile.ageVerified
     ) {
 
       ageVerified =
@@ -1436,21 +1390,23 @@ function loadSavedProfile() {
   } catch (error) {
 
     console.error(
-      "Saved profile loading error:",
+      "Saved data error:",
       error
     );
 
   }
+
 }
 
 
 /* =========================================================
-   DATING HOME
+   HOME
    ========================================================= */
 
 function openDatingHome() {
 
   showDatingHome();
+
 }
 
 
@@ -1462,25 +1418,24 @@ function showDatingHome() {
 
 
   renderDatingProfiles();
+
 }
 
 
 /* =========================================================
-   RENDER DATING PROFILE
+   PROFILE CARD
    ========================================================= */
 
 function renderDatingProfiles() {
 
   const container =
-    getElement(
-      "dating-profiles",
-      "profiles-container",
-      "profile-list"
-    );
+    $("dating-profiles");
 
 
   if (!container) {
+
     return;
+
   }
 
 
@@ -1491,18 +1446,33 @@ function renderDatingProfiles() {
   if (!profile) {
 
     container.innerHTML = `
-      <div class="empty-state">
-        <h3>No profile yet</h3>
-        <p>Create your profile to get started.</p>
+
+      <div class="dating-profile-card">
+
+        <div class="dating-profile-info">
+
+          <h3>
+            Create your profile
+          </h3>
+
+          <p class="profile-bio">
+            Complete your profile to start.
+          </p>
+
+        </div>
+
       </div>
+
     `;
 
     return;
+
   }
 
 
   const answers =
-    profile.answers || {};
+    profile.answers ||
+    {};
 
 
   const name =
@@ -1523,7 +1493,7 @@ function renderDatingProfiles() {
 
   const bio =
     answers.bio ||
-    "New here. Looking to meet someone interesting.";
+    "Looking to meet someone interesting.";
 
 
   const picture =
@@ -1533,9 +1503,13 @@ function renderDatingProfiles() {
 
   container.innerHTML = `
 
-    <div class="dating-profile-card">
+    <article
+      class="dating-profile-card"
+    >
 
-      <div class="dating-profile-image">
+      <div
+        class="dating-profile-image"
+      >
 
         <img
           src="${escapeHtml(picture)}"
@@ -1544,24 +1518,37 @@ function renderDatingProfiles() {
 
       </div>
 
-      <div class="dating-profile-info">
+
+      <div
+        class="dating-profile-info"
+      >
 
         <h3>
           ${escapeHtml(name)}
         </h3>
 
+
         <p class="profile-city">
-          <i class="fa-solid fa-location-dot"></i>
+
+          <i
+            class="fa-solid fa-location-dot"
+          ></i>
+
           ${escapeHtml(city)}
+
         </p>
+
 
         ${
           gender
-            ? `<span class="profile-gender">
+            ? `
+              <span class="profile-gender">
                 ${escapeHtml(gender)}
-              </span>`
+              </span>
+            `
             : ""
         }
+
 
         <p class="profile-bio">
           ${escapeHtml(bio)}
@@ -1569,9 +1556,10 @@ function renderDatingProfiles() {
 
       </div>
 
-    </div>
+    </article>
 
   `;
+
 }
 
 
@@ -1591,77 +1579,41 @@ function showMyProfile() {
 
 
   if (!profile) {
+
     return;
+
   }
 
 
   const answers =
-    profile.answers || {};
+    profile.answers ||
+    {};
 
 
-  const nameElement =
-    getElement(
-      "my-profile-name",
-      "profile-name"
-    );
+  $("my-profile-name")
+    .textContent =
+    answers.name ||
+    profile.name ||
+    "User";
 
 
-  const cityElement =
-    getElement(
-      "my-profile-city",
-      "profile-city"
-    );
+  $("my-profile-city")
+    .textContent =
+    answers.city ||
+    "";
 
 
-  const bioElement =
-    getElement(
-      "my-profile-bio",
-      "profile-bio"
-    );
+  $("my-profile-bio")
+    .textContent =
+    answers.bio ||
+    "";
 
 
-  const imageElement =
-    getElement(
-      "my-profile-image",
-      "profile-image"
-    );
+  $("my-profile-image")
+    .src =
+    profile.picture ||
+    "https://www.gravatar.com/avatar/?d=mp";
 
-
-  if (nameElement) {
-
-    nameElement.textContent =
-      answers.name ||
-      profile.name ||
-      "User";
-
-  }
-
-
-  if (cityElement) {
-
-    cityElement.textContent =
-      answers.city ||
-      "";
-
-  }
-
-
-  if (bioElement) {
-
-    bioElement.textContent =
-      answers.bio ||
-      "";
-
-  }
-
-
-  if (imageElement) {
-
-    imageElement.src =
-      profile.picture ||
-      "https://www.gravatar.com/avatar/?d=mp";
-
-  }
 }
 
 
@@ -1671,13 +1623,17 @@ function showMyProfile() {
 
 function logout() {
 
-  currentUser = null;
+  currentUser =
+    null;
 
-  profileAnswers = {};
+  currentQuestion =
+    0;
 
-  ageVerified = false;
+  profileAnswers =
+    {};
 
-  currentQuestion = 0;
+  ageVerified =
+    false;
 
 
   localStorage.removeItem(
@@ -1695,13 +1651,8 @@ function logout() {
   );
 
 
-  localStorage.removeItem(
-    "dating_payment_started"
-  );
-
-
   /*
-     Tell Google that the user is signed out.
+     Google session auto-select disable.
   */
 
   try {
@@ -1712,52 +1663,36 @@ function logout() {
       google.accounts.id
     ) {
 
-      google.accounts.id.disableAutoSelect();
+      google.accounts.id
+        .disableAutoSelect();
 
     }
 
   } catch (error) {
 
-    console.log(
-      "Google logout cleanup:",
-      error
-    );
+    console.log(error);
+
   }
 
 
-  showToast(
-    "Logged out successfully.",
-    "success"
+  showScreen(
+    "login-gate"
   );
 
-
-  setTimeout(() => {
-
-    showScreen(
-      "login-gate"
-    );
-
-  }, 500);
 }
 
 
 /* =========================================================
-   HTML ESCAPE
+   ESCAPE HTML
    ========================================================= */
 
-function escapeHtml(value) {
+function escapeHtml(
+  value
+) {
 
-  if (
-    value === null ||
-    value === undefined
-  ) {
-
-    return "";
-
-  }
-
-
-  return String(value)
+  return String(
+    value ?? ""
+  )
 
     .replace(
       /&/g,
@@ -1783,140 +1718,122 @@ function escapeHtml(value) {
       /'/g,
       "&#039;"
     );
+
 }
 
 
 /* =========================================================
-   PAYMENT RETURN HANDLER
+   INIT
    ========================================================= */
 
-/*
-   If Razorpay Payment Link is configured with a callback URL,
-   Razorpay can return the customer to your GitHub Pages site.
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
 
-   This detects common callback parameters.
+    /*
+       Load saved login
+    */
 
-   NOTE:
-   This does NOT cryptographically verify payment.
-*/
-
-function handlePaymentReturn() {
-
-  const params =
-    new URLSearchParams(
-      window.location.search
-    );
-
-
-  const paymentId =
-    params.get(
-      "razorpay_payment_id"
-    );
-
-
-  const paymentLinkId =
-    params.get(
-      "razorpay_payment_link_id"
-    );
-
-
-  const paymentStatus =
-    params.get(
-      "razorpay_payment_link_status"
-    );
-
-
-  if (
-    paymentId ||
-    paymentLinkId ||
-    paymentStatus
-  ) {
-
-    const savedUser =
-      localStorage.getItem(
-        "dating_google_user"
-      );
-
-
-    if (savedUser) {
-
-      try {
-
-        currentUser =
-          JSON.parse(
-            savedUser
-          );
-
-      } catch (error) {
-
-        console.error(error);
-
-      }
-    }
-
-
-    if (currentUser) {
-
-      /*
-         Local completion only.
-      */
-
-      createDatingProfile({
-
-        verified:
-          false,
-
-        status:
-          paymentStatus ||
-          "payment-returned",
-
-        paymentId:
-          paymentId ||
-          paymentLinkId ||
-          ""
-
-      });
-
-    }
+    loadSavedProfile();
 
 
     /*
-       Remove query parameters.
+       Start REAL Google Login
     */
 
-    try {
+    initializeGoogleLogin();
 
-      window.history.replaceState(
-        {},
-        document.title,
-        window.location.pathname
+
+    /*
+       Initial screen
+    */
+
+    if (
+      currentUser
+    ) {
+
+      const profile =
+        getSavedProfile();
+
+
+      if (
+        profile &&
+        profile.email ===
+          currentUser.email &&
+        profile.paymentVerified ===
+          true
+      ) {
+
+        showDatingHome();
+
+      } else {
+
+        showScreen(
+          "login-gate"
+        );
+
+      }
+
+    } else {
+
+      showScreen(
+        "login-gate"
       );
 
-    } catch (error) {
-
-      console.log(error);
-
     }
+
   }
-}
+);
 
 
 /* =========================================================
-   FALLBACK GOOGLE CLICK
+   GLOBAL FUNCTIONS
    ========================================================= */
 
-function handleFallbackGoogleClick() {
+window.initializeGoogleLogin =
+  initializeGoogleLogin;
 
-  /*
-     If a manually created fallback button exists,
-     try to trigger Google's One Tap.
+window.handleGoogleCredential =
+  handleGoogleCredential;
 
-     The actual rendered Google button remains the
-     primary login method.
-  */
+window.verifyAge =
+  verifyAge;
 
-  try {
+window.nextQuestion =
+  nextQuestion;
 
-    if (
-      window.google &&
-     
+window.selectOption =
+  function(id, value) {
+
+    profileAnswers[id] =
+      value;
+
+    renderQuestion();
+
+  };
+
+window.startPayment =
+  startPayment;
+
+window.openDatingHome =
+  openDatingHome;
+
+window.showDatingHome =
+  showDatingHome;
+
+window.showMyProfile =
+  showMyProfile;
+
+window.logout =
+  logout;
+
+window.createDatingProfile =
+  createDatingProfile;
+
+window.showScreen =
+  showScreen;
+
+
+/* =========================================================
+   END
+   ========================================================= */
