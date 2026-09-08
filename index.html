@@ -1,451 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-  />
-
-  <title>Velora — Meet Someone Real</title>
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <meta
     name="description"
-    content="Velora is a modern dating experience built for meaningful connections."
-  />
+    content="A modern dating profile platform."
+  >
+
+  <title>Heartly — Find Your Connection</title>
 
   <!-- Google Identity Services -->
   <script
     src="https://accounts.google.com/gsi/client"
     async
-    defer
-  ></script>
+    defer>
+  </script>
 
-  <!-- Icons -->
+  <!-- Font Awesome -->
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-  />
+  >
 
-  <!-- Styles -->
-  <link rel="stylesheet" href="style.css" />
+  <!-- CSS -->
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
 </head>
 
 <body>
 
-  <!-- ================================
-       APP SHELL
-  ================================= -->
+  <!-- =====================================================
+       LOGIN
+       ===================================================== -->
 
-  <div id="app">
+  <main class="app">
 
-    <!-- ================================
-         LOGIN
-    ================================= -->
+    <section
+      id="login-gate"
+      class="screen-content active"
+    >
 
-    <section id="login-gate" class="screen-content active">
+      <div class="auth-card">
 
-      <div class="auth-layout">
-
-        <div class="auth-visual">
-
-          <div class="auth-brand">
-            <span class="brand-mark">
-              <i class="fa-solid fa-heart"></i>
-            </span>
-
-            <span>VELORA</span>
+        <div class="brand">
+          <div class="brand-icon">
+            <i class="fa-solid fa-heart"></i>
           </div>
 
-          <div class="auth-visual-content">
-
-            <span class="eyebrow">
-              <i class="fa-solid fa-sparkles"></i>
-              Dating, but better
-            </span>
-
-            <h1>
-              Meet someone
-              <span>worth staying for.</span>
-            </h1>
-
-            <p>
-              Discover genuine people, meaningful conversations
-              and connections that feel natural.
-            </p>
-
-            <div class="social-proof">
-              <div class="mini-avatars">
-                <span>V</span>
-                <span>M</span>
-                <span>A</span>
-                <span>+</span>
-              </div>
-
-              <div>
-                <strong>Made for real connections</strong>
-                <small>Simple. Private. Human.</small>
-              </div>
-            </div>
-
-          </div>
-
-          <div class="auth-visual-footer">
-            <span>
-              <i class="fa-solid fa-shield-heart"></i>
-              Your privacy matters
-            </span>
-
-            <span>
-              <i class="fa-solid fa-circle-check"></i>
-              18+ community
-            </span>
-          </div>
-
-        </div>
-
-
-        <div class="auth-panel">
-
-          <div class="auth-mobile-brand">
-            <span class="brand-mark">
-              <i class="fa-solid fa-heart"></i>
-            </span>
-
-            <strong>VELORA</strong>
-          </div>
-
-          <div class="auth-card">
-
-            <div class="auth-heading">
-              <span class="mobile-eyebrow">WELCOME</span>
-
-              <h2>Let's find your person.</h2>
-
-              <p>
-                Sign in with Google to create your dating profile.
-              </p>
-            </div>
-
-
-            <div class="google-login-wrap">
-
-              <div id="google-signin"></div>
-
-              <button
-                type="button"
-                id="fallback-google-btn"
-                class="google-btn"
-                onclick="handleFallbackGoogleClick()"
-              >
-                <span class="google-icon">G</span>
-                <span>Continue with Google</span>
-                <i class="fa-solid fa-arrow-right"></i>
-              </button>
-
-            </div>
-
-
-            <div class="auth-divider">
-              <span>PRIVATE BY DESIGN</span>
-            </div>
-
-
-            <div class="login-benefits">
-
-              <div>
-                <span class="benefit-icon">
-                  <i class="fa-solid fa-user-shield"></i>
-                </span>
-
-                <div>
-                  <strong>Simple profile</strong>
-                  <small>Only share what you choose.</small>
-                </div>
-              </div>
-
-              <div>
-                <span class="benefit-icon">
-                  <i class="fa-solid fa-heart"></i>
-                </span>
-
-                <div>
-                  <strong>Meaningful discovery</strong>
-                  <small>Designed around people, not noise.</small>
-                </div>
-              </div>
-
-            </div>
-
-
-            <p class="terms">
-              By continuing, you agree to use Velora respectfully
-              and only if you are 18 or older.
-            </p>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- ================================
-         AGE VERIFICATION
-    ================================= -->
-
-    <section id="age-screen" class="screen-content">
-
-      <div class="onboarding-shell">
-
-        <div class="onboarding-topbar">
-          <div class="small-brand">
-            <span class="brand-mark small">
-              <i class="fa-solid fa-heart"></i>
-            </span>
-            VELORA
-          </div>
-
-          <span class="step-count">01 / 06</span>
-        </div>
-
-
-        <div class="onboarding-content">
-
-          <div class="onboarding-icon">
-            <i class="fa-solid fa-cake-candles"></i>
-          </div>
-
-          <span class="eyebrow">FIRST THINGS FIRST</span>
-
-          <h2>When were you born?</h2>
+          <h1>Heartly</h1>
 
           <p>
-            Velora is an 18+ dating community.
-            Your exact birthday won't be shown publicly.
+            Find someone who feels like home.
           </p>
-
-
-          <div class="input-card">
-
-            <label for="dob">
-              Date of birth
-            </label>
-
-            <div class="input-wrap">
-              <i class="fa-regular fa-calendar"></i>
-
-              <input
-                id="dob"
-                type="date"
-                autocomplete="bday"
-              />
-            </div>
-
-            <small>
-              You must be 18 or older to continue.
-            </small>
-
-          </div>
-
-
-          <button
-            class="primary-btn large"
-            onclick="verifyAge()"
-          >
-            Continue
-            <i class="fa-solid fa-arrow-right"></i>
-          </button>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- ================================
-         QUESTIONS
-    ================================= -->
-
-    <section id="questions-screen" class="screen-content">
-
-      <div class="onboarding-shell">
-
-        <div class="onboarding-topbar">
-
-          <button
-            class="icon-btn ghost"
-            onclick="showScreen('age-screen')"
-            aria-label="Back"
-          >
-            <i class="fa-solid fa-arrow-left"></i>
-          </button>
-
-          <div class="progress-wrap">
-            <div class="progress-track">
-              <div
-                id="question-progress"
-                class="progress-fill"
-              ></div>
-            </div>
-
-            <span id="question-counter">
-              02 / 06
-            </span>
-          </div>
-
         </div>
 
 
-        <div class="question-content">
-
-          <div class="question-icon">
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-          </div>
-
-          <span class="eyebrow">BUILD YOUR PROFILE</span>
-
-          <h2 id="question-title">
-            What's your name?
-          </h2>
-
-          <p id="question-subtitle">
-            Let's start with something simple.
-          </p>
-
-
-          <div id="question-container"></div>
-
-
-          <button
-            id="question-next"
-            class="primary-btn large"
-            onclick="nextQuestion()"
-          >
-            Continue
-            <i class="fa-solid fa-arrow-right"></i>
-          </button>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- ================================
-         PAYMENT
-    ================================= -->
-
-    <section id="payment-screen" class="screen-content">
-
-      <div class="payment-shell">
-
-        <div class="payment-topbar">
-
-          <div class="small-brand">
-            <span class="brand-mark small">
-              <i class="fa-solid fa-heart"></i>
-            </span>
-            VELORA
-          </div>
-
-          <span class="secure-label">
-            <i class="fa-solid fa-lock"></i>
-            Secure checkout
-          </span>
-
-        </div>
-
-
-        <div class="payment-card">
-
-          <div class="payment-icon">
-            <i class="fa-solid fa-heart"></i>
-          </div>
-
-          <span class="eyebrow">
-            ALMOST THERE
-          </span>
+        <div class="auth-content">
 
           <h2>
-            Activate your profile.
+            Welcome back
           </h2>
 
-          <p class="payment-intro">
-            Complete the one-time profile activation to enter
-            the Velora discovery experience.
+          <p class="auth-subtitle">
+            Sign in with your Google account
+            to create your dating profile.
           </p>
 
 
-          <div class="price-display">
+          <!-- =================================================
+               REAL GOOGLE BUTTON
+               DO NOT REPLACE THIS WITH A CUSTOM BUTTON
+               ================================================= -->
 
-            <span class="price-label">
-              One-time activation
-            </span>
-
-            <strong>
-              ₹45
-            </strong>
-
-            <span>
-              No recurring charge
-            </span>
-
-          </div>
+          <div
+            id="google-signin"
+            class="google-container"
+          ></div>
 
 
-          <div class="payment-features">
-
-            <div>
-              <i class="fa-solid fa-check"></i>
-              Profile discovery
-            </div>
-
-            <div>
-              <i class="fa-solid fa-check"></i>
-              Personalized profile
-            </div>
-
-            <div>
-              <i class="fa-solid fa-check"></i>
-              Velora community access
-            </div>
-
-          </div>
-
-
-          <button
-            id="pay-btn"
-            class="primary-btn large payment-btn"
-            onclick="startPayment()"
-          >
-            Pay ₹45
-            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-          </button>
-
-
-          <button
-            id="payment-complete-btn"
-            class="text-btn"
-            onclick="confirmPaymentManually()"
-          >
-            I've completed the payment
-          </button>
-
-
-          <div class="payment-note">
-            <i class="fa-solid fa-circle-info"></i>
+          <div class="secure-note">
+            <i class="fa-solid fa-shield-halved"></i>
 
             <span>
-              Payment opens in Razorpay. Since this version
-              does not use a backend, payment completion cannot
-              be independently verified by the website.
+              Secure sign-in powered by Google
             </span>
           </div>
+
+        </div>
+
+
+        <div class="auth-footer">
+
+          <p>
+            By continuing, you agree to our
+            Terms & Privacy Policy.
+          </p>
 
         </div>
 
@@ -454,35 +111,52 @@
     </section>
 
 
-    <!-- ================================
-         PROFILE CREATED
-    ================================= -->
+    <!-- =====================================================
+         AGE VERIFICATION
+         ===================================================== -->
 
-    <section id="profile-created-screen" class="screen-content">
+    <section
+      id="age-screen"
+      class="screen-content"
+    >
 
-      <div class="success-shell">
+      <div class="form-card">
 
-        <div class="success-animation">
-          <div class="success-heart">
-            <i class="fa-solid fa-heart"></i>
-          </div>
+        <div class="step-icon">
+          <i class="fa-solid fa-calendar-check"></i>
         </div>
 
-        <span class="eyebrow">YOU'RE READY</span>
+        <div class="step-label">
+          STEP 1 OF 2
+        </div>
 
         <h2>
-          Your profile is live.
+          First, let's verify your age.
         </h2>
 
         <p>
-          Welcome to Velora. Let's see who catches your attention.
+          You must be 18 or older to use
+          this dating platform.
         </p>
 
-        <button
-          class="primary-btn large"
-          onclick="openDatingHome()"
+
+        <label for="dob">
+          Date of birth
+        </label>
+
+        <input
+          type="date"
+          id="dob"
+          class="form-input"
         >
-          Start discovering
+
+
+        <button
+          type="button"
+          class="primary-btn"
+          onclick="verifyAge()"
+        >
+          Continue
           <i class="fa-solid fa-arrow-right"></i>
         </button>
 
@@ -491,256 +165,213 @@
     </section>
 
 
-    <!-- ================================
-         DATING HOME
-    ================================= -->
+    <!-- =====================================================
+         QUESTIONS
+         ===================================================== -->
 
-    <section id="dating-home" class="screen-content app-screen">
+    <section
+      id="questions-screen"
+      class="screen-content"
+    >
 
-      <div class="app-layout">
+      <div class="form-card">
 
-        <!-- Desktop sidebar -->
-        <aside class="desktop-sidebar">
+        <div class="progress-top">
 
-          <div class="sidebar-logo">
-            <span class="brand-mark">
-              <i class="fa-solid fa-heart"></i>
-            </span>
-            <strong>VELORA</strong>
-          </div>
+          <span id="question-number">
+            1 / 5
+          </span>
 
-          <nav>
+        </div>
 
-            <button
-              class="side-nav active"
-              onclick="showDatingHome()"
-            >
-              <i class="fa-solid fa-compass"></i>
-              Discover
-            </button>
+        <div class="progress-bar">
 
-            <button
-              class="side-nav"
-              onclick="showToast('Matches are coming soon.')"
-            >
-              <i class="fa-solid fa-heart"></i>
-              Matches
-              <span class="nav-badge">0</span>
-            </button>
+          <div
+            id="progress-fill"
+            class="progress-fill"
+          ></div>
 
-            <button
-              class="side-nav"
-              onclick="showToast('Messaging is coming soon.')"
-            >
-              <i class="fa-regular fa-message"></i>
-              Messages
-            </button>
-
-            <button
-              class="side-nav"
-              onclick="showMyProfile()"
-            >
-              <i class="fa-regular fa-user"></i>
-              My profile
-            </button>
-
-          </nav>
+        </div>
 
 
-          <div class="sidebar-bottom">
+        <div class="question-header">
 
-            <div class="safety-box">
-              <i class="fa-solid fa-shield-heart"></i>
+          <h2 id="question-title">
+            What's your name?
+          </h2>
 
-              <div>
-                <strong>Stay safe</strong>
-                <span>Never share sensitive information.</span>
-              </div>
-            </div>
-
-            <button
-              class="logout-btn"
-              onclick="logoutUser()"
-            >
-              <i class="fa-solid fa-arrow-right-from-bracket"></i>
-              Log out
-            </button>
-
-          </div>
-
-        </aside>
-
-
-        <!-- Main discovery -->
-        <main class="discover-main">
-
-          <header class="mobile-app-header">
-
-            <div class="mobile-logo">
-              <span class="brand-mark small">
-                <i class="fa-solid fa-heart"></i>
-              </span>
-
-              <strong>VELORA</strong>
-            </div>
-
-            <button
-              class="header-icon"
-              onclick="showToast('Filters are coming soon.')"
-            >
-              <i class="fa-solid fa-sliders"></i>
-            </button>
-
-          </header>
-
-
-          <div class="discover-heading">
-
-            <div>
-              <span class="eyebrow">
-                DISCOVER
-              </span>
-
-              <h1>
-                Someone new.
-              </h1>
-
-              <p>
-                Take your time. Good connections aren't rushed.
-              </p>
-            </div>
-
-            <button
-              class="filter-btn"
-              onclick="showToast('Filters are coming soon.')"
-            >
-              <i class="fa-solid fa-sliders"></i>
-              Filters
-            </button>
-
-          </div>
-
-
-          <!-- Profile card -->
-          <div class="profile-stage">
-
-            <div
-              id="dating-profiles"
-              class="dating-profiles"
-            ></div>
-
-          </div>
-
-
-          <div class="discover-actions">
-
-            <button
-              class="round-action pass"
-              onclick="passCurrentProfile()"
-              aria-label="Pass"
-            >
-              <i class="fa-solid fa-xmark"></i>
-            </button>
-
-            <button
-              class="round-action rewind"
-              onclick="showToast('Rewind is a premium feature.')"
-              aria-label="Rewind"
-            >
-              <i class="fa-solid fa-rotate-left"></i>
-            </button>
-
-            <button
-              class="round-action like"
-              onclick="likeCurrentProfile()"
-              aria-label="Like"
-            >
-              <i class="fa-solid fa-heart"></i>
-            </button>
-
-          </div>
-
-
-          <p class="swipe-hint">
-            <i class="fa-solid fa-arrows-left-right"></i>
-            Swipe cards or use the buttons
+          <p id="question-subtitle">
+            Tell us what you'd like people to call you.
           </p>
 
-        </main>
+        </div>
+
+
+        <div
+          id="question-container"
+          class="question-container"
+        ></div>
+
+
+        <button
+          id="next-btn"
+          type="button"
+          class="primary-btn"
+          onclick="nextQuestion()"
+        >
+          Continue
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
 
       </div>
-
-
-      <!-- Mobile bottom navigation -->
-      <nav class="bottom-nav">
-
-        <button
-          class="bottom-nav-item active"
-          onclick="showDatingHome()"
-        >
-          <i class="fa-solid fa-compass"></i>
-          <span>Discover</span>
-        </button>
-
-        <button
-          class="bottom-nav-item"
-          onclick="showToast('Matches are coming soon.')"
-        >
-          <i class="fa-solid fa-heart"></i>
-          <span>Matches</span>
-        </button>
-
-        <button
-          class="bottom-nav-item"
-          onclick="showToast('Messages are coming soon.')"
-        >
-          <i class="fa-regular fa-message"></i>
-          <span>Chats</span>
-        </button>
-
-        <button
-          class="bottom-nav-item"
-          onclick="showMyProfile()"
-        >
-          <i class="fa-regular fa-user"></i>
-          <span>Profile</span>
-        </button>
-
-      </nav>
 
     </section>
 
 
-    <!-- ================================
-         MY PROFILE
-    ================================= -->
+    <!-- =====================================================
+         PAYMENT
+         ===================================================== -->
 
-    <section id="my-profile-screen" class="screen-content app-screen">
+    <section
+      id="payment-screen"
+      class="screen-content"
+    >
 
-      <div class="profile-page">
+      <div class="payment-card">
 
-        <header class="profile-page-header">
+        <div class="payment-icon">
+          <i class="fa-solid fa-heart"></i>
+        </div>
+
+        <span class="step-label">
+          FINAL STEP
+        </span>
+
+        <h2>
+          Complete your profile
+        </h2>
+
+        <p>
+          Your profile is ready.
+          Complete the one-time profile creation payment.
+        </p>
+
+
+        <div class="price-box">
+
+          <span>
+            Profile Creation
+          </span>
+
+          <strong>
+            ₹<span id="payment-price">45</span>
+          </strong>
+
+        </div>
+
+
+        <button
+          id="pay-btn"
+          type="button"
+          class="primary-btn"
+          onclick="startPayment()"
+        >
+          Pay ₹45
+          <i class="fa-solid fa-lock"></i>
+        </button>
+
+
+        <div class="payment-security">
+
+          <i class="fa-solid fa-shield-halved"></i>
+
+          <span>
+            Secure payment powered by Razorpay
+          </span>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         PROFILE CREATED
+         ===================================================== -->
+
+    <section
+      id="profile-created-screen"
+      class="screen-content"
+    >
+
+      <div class="success-card">
+
+        <div class="success-icon">
+          <i class="fa-solid fa-check"></i>
+        </div>
+
+        <h2>
+          Profile saved!
+        </h2>
+
+        <p>
+          Your profile information has been saved.
+        </p>
+
+        <button
+          type="button"
+          class="primary-btn"
+          onclick="openDatingHome()"
+        >
+          Enter Heartly
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         DATING HOME
+         ===================================================== -->
+
+    <section
+      id="dating-home"
+      class="screen-content"
+    >
+
+      <div class="home-page">
+
+        <header class="app-header">
+
+          <div>
+            <span class="eyebrow">
+              HEARTLY
+            </span>
+
+            <h1>
+              Discover
+            </h1>
+          </div>
 
           <button
-            class="icon-btn ghost"
-            onclick="showDatingHome()"
+            type="button"
+            class="icon-btn"
+            onclick="showMyProfile()"
+            aria-label="My profile"
           >
-            <i class="fa-solid fa-arrow-left"></i>
-          </button>
-
-          <h2>My profile</h2>
-
-          <button
-            class="icon-btn ghost"
-            onclick="showToast('Profile editing is coming soon.')"
-          >
-            <i class="fa-solid fa-pen"></i>
+            <i class="fa-regular fa-user"></i>
           </button>
 
         </header>
 
 
-        <div id="my-profile-content"></div>
+        <div
+          id="dating-profiles"
+          class="dating-profiles"
+        ></div>
 
       </div>
 
@@ -748,31 +379,18 @@
       <nav class="bottom-nav">
 
         <button
-          class="bottom-nav-item"
+          type="button"
+          class="nav-item active"
           onclick="showDatingHome()"
         >
           <i class="fa-solid fa-compass"></i>
           <span>Discover</span>
         </button>
 
-        <button
-          class="bottom-nav-item"
-          onclick="showToast('Matches are coming soon.')"
-        >
-          <i class="fa-solid fa-heart"></i>
-          <span>Matches</span>
-        </button>
 
         <button
-          class="bottom-nav-item"
-          onclick="showToast('Messages are coming soon.')"
-        >
-          <i class="fa-regular fa-message"></i>
-          <span>Chats</span>
-        </button>
-
-        <button
-          class="bottom-nav-item active"
+          type="button"
+          class="nav-item"
           onclick="showMyProfile()"
         >
           <i class="fa-regular fa-user"></i>
@@ -784,20 +402,120 @@
     </section>
 
 
-    <!-- Toast -->
+    <!-- =====================================================
+         MY PROFILE
+         ===================================================== -->
+
+    <section
+      id="my-profile-screen"
+      class="screen-content"
+    >
+
+      <div class="profile-page">
+
+        <header class="app-header">
+
+          <div>
+            <span class="eyebrow">
+              YOUR ACCOUNT
+            </span>
+
+            <h1>
+              My Profile
+            </h1>
+          </div>
+
+          <button
+            type="button"
+            class="icon-btn"
+            onclick="showDatingHome()"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+
+        </header>
+
+
+        <div class="my-profile-card">
+
+          <img
+            id="my-profile-image"
+            src="https://www.gravatar.com/avatar/?d=mp"
+            alt="Profile photo"
+            class="profile-photo"
+          >
+
+
+          <h2 id="my-profile-name">
+            User
+          </h2>
+
+
+          <p
+            id="my-profile-city"
+            class="profile-location"
+          ></p>
+
+
+          <p
+            id="my-profile-bio"
+            class="my-bio"
+          ></p>
+
+
+          <button
+            type="button"
+            class="logout-btn"
+            onclick="logout()"
+          >
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            Log out
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <nav class="bottom-nav">
+
+        <button
+          type="button"
+          class="nav-item"
+          onclick="showDatingHome()"
+        >
+          <i class="fa-solid fa-compass"></i>
+          <span>Discover</span>
+        </button>
+
+
+        <button
+          type="button"
+          class="nav-item active"
+          onclick="showMyProfile()"
+        >
+          <i class="fa-regular fa-user"></i>
+          <span>Profile</span>
+        </button>
+
+      </nav>
+
+    </section>
+
+
+    <!-- =====================================================
+         TOAST
+         ===================================================== -->
+
     <div
       id="toast"
       class="toast"
-      role="status"
-      aria-live="polite"
-    >
-      <i class="fa-solid fa-circle-check"></i>
-      <span id="toast-message"></span>
-    </div>
+    ></div>
 
-  </div>
+  </main>
 
 
+  <!-- JS -->
   <script src="script.js"></script>
 
 </body>
